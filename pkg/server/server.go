@@ -32,6 +32,10 @@ func New(service service.Service) *Server {
 	r.HandleFunc("api/v1/graph/{id:[1-9]+[0-9]*}/incidenceMatrix", s.IncidenceMatrix).Methods(http.MethodGet)
 	r.HandleFunc("api/v1/graph/{id:[1-9]+[0-9]*}/shortestPath", s.ShortestPath).
 		Queries("fromNode", "{fromNode}", "toNode", "{toNode}").Methods(http.MethodGet)
+	r.HandleFunc("api/v1/graph/{id:[1-9]+[0-9]*}/allShortestPath", s.AllShortestPaths).
+		Queries("fromNode", "{fromNode}", "toNode", "{toNode}").Methods(http.MethodGet)
+	r.HandleFunc("api/v1/graph/{id:[1-9]+[0-9]*}/hamiltonianPath", s.HamiltonianPath).
+		Queries("startNode", "{startNode}").Methods(http.MethodGet)
 	r.HandleFunc("api/v1/graph/{id:[1-9]+[0-9]*}", s.Graph).Methods(http.MethodGet)
 
 	return s
@@ -164,6 +168,44 @@ func (s *Server) ShortestPath(w http.ResponseWriter, req *http.Request) {
 	_ = json.NewEncoder(w).Encode(resp)
 }
 
+func (s *Server) AllShortestPaths(w http.ResponseWriter, req *http.Request) {
+	args, err := getShortestPathArgs(req)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+	path, err := s.service.AllShortestPaths(args.graphID, args.fromNode, args.toNode)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	resp := struct {
+		Path [][]model.Node `json:"paths"`
+	}{
+		Path: path,
+	}
+	_ = json.NewEncoder(w).Encode(resp)
+}
+
+func (s *Server) HamiltonianPath(w http.ResponseWriter, req *http.Request) {
+	args, err := getHamiltonPathArgs(req)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+	path, err := s.service.HamiltonianPath(args.graphID, args.startedNode)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	resp := struct {
+		Path []model.Node `json:"path"`
+	}{
+		Path: path,
+	}
+	_ = json.NewEncoder(w).Encode(resp)
+}
+
 func getID(req *http.Request) (uint64, error) {
 	return getSpecificID(req, "id")
 }
@@ -191,6 +233,26 @@ func getShortestPathArgs(req *http.Request) (shortestPathArgs, error) {
 		graphID:  id,
 		fromNode: fromNode,
 		toNode:   toNode,
+	}, nil
+}
+
+type hamiltonPathArgs struct {
+	graphID     uint64
+	startedNode uint64
+}
+
+func getHamiltonPathArgs(req *http.Request) (hamiltonPathArgs, error) {
+	id, err := getID(req)
+	if err != nil {
+		return hamiltonPathArgs{}, err
+	}
+	startedNode, err := getSpecificID(req, "startedNode")
+	if err != nil {
+		return hamiltonPathArgs{}, err
+	}
+	return hamiltonPathArgs{
+		graphID:     id,
+		startedNode: startedNode,
 	}, nil
 }
 

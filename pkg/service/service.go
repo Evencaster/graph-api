@@ -11,6 +11,8 @@ type Service interface {
 	IncidenceMatrix(id uint64) (graph.IncidenceMatrix, error)
 	AdjacencyMatrix(id uint64) (graph.AdjacencyMatrix, error)
 	ShortestPath(graphID, fromNode, toNode uint64) ([]model.Node, error)
+	AllShortestPaths(graphID, fromNode, toNode uint64) ([][]model.Node, error)
+	HamiltonianPath(graphID, startedNode uint64) ([]model.Node, error)
 }
 
 type Graph struct {
@@ -47,6 +49,26 @@ func (g *Graph) ShortestPath(graphID, fromNode, toNode uint64) ([]model.Node, er
 		return nil, err
 	}
 	return g.graph.ShortestPath(foundGraph, fromNode, toNode), nil
+}
+
+func (g *Graph) AllShortestPaths(graphID, fromNode, toNode uint64) ([][]model.Node, error) {
+	foundGraph, err := g.Graph(graphID)
+	if err != nil {
+		return nil, err
+	}
+	return g.graph.AllShortestPaths(foundGraph, fromNode, toNode), nil
+}
+
+func (g *Graph) HamiltonianPath(graphID, startedNode uint64) ([]model.Node, error) {
+	foundGraph, err := g.Graph(graphID)
+	if err != nil {
+		return nil, err
+	}
+	path, found := g.graph.HamiltonianPath(foundGraph, startedNode)
+	if !found {
+		return nil, repository.ErrNotFound
+	}
+	return path, nil
 }
 
 func (g *Graph) CreateGraph(graph model.Graph) (uint64, error) {
