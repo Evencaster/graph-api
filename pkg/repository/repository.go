@@ -26,6 +26,13 @@ func New() *DB {
 	}
 }
 
+type Repository interface {
+	CreateGraph(graph model.Graph) (uint64, error)
+	Graph(id uint64) (model.Graph, error)
+	UpdateGraph(graph model.Graph) error
+	DeleteGraph(id uint64) error
+}
+
 func (d *DB) CreateGraph(graph model.Graph) (uint64, error) {
 	d.mx.Lock()
 	id := uint64(d.uuid.ID())

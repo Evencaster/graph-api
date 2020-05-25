@@ -2,24 +2,22 @@ package service
 
 import (
 	"github.com/illfate2/graph-api/pkg/model"
+	"github.com/illfate2/graph-api/pkg/repository"
 	"github.com/illfate2/graph-api/pkg/service/graph"
 )
 
 type Service interface {
-	CreateGraph(graph model.Graph) (uint64, error)
-	Graph(id uint64) (model.Graph, error)
-	UpdateGraph(graph model.Graph) error
-	DeleteGraph(id uint64) error
+	repository.Repository
 	IncidenceMatrix(id uint64) (graph.IncidenceMatrix, error)
 	AdjacencyMatrix(id uint64) (graph.AdjacencyMatrix, error)
 }
 
 type Graph struct {
-	repository Service
+	repository repository.Repository
 	graph      graph.Methods
 }
 
-func NewGraph(repo Service) *Graph {
+func NewGraph(repo repository.Repository) *Graph {
 	return &Graph{
 		repository: repo,
 		graph:      graph.Graph{},
