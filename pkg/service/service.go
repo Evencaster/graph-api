@@ -2,6 +2,7 @@ package service
 
 import (
 	"github.com/illfate2/graph-api/pkg/model"
+	"github.com/illfate2/graph-api/pkg/service/graph"
 )
 
 type Service interface {
@@ -9,14 +10,36 @@ type Service interface {
 	Graph(id uint64) (model.Graph, error)
 	UpdateGraph(graph model.Graph) error
 	DeleteGraph(id uint64) error
+	IncidenceMatrix(id uint64) (graph.IncidenceMatrix, error)
+	AdjacencyMatrix(id uint64) (graph.AdjacencyMatrix, error)
 }
 
 type Graph struct {
 	repository Service
+	graph      graph.Methods
 }
 
 func NewGraph(repo Service) *Graph {
-	return &Graph{repository: repo}
+	return &Graph{
+		repository: repo,
+		graph:      graph.Graph{},
+	}
+}
+
+func (g *Graph) IncidenceMatrix(id uint64) (graph.IncidenceMatrix, error) {
+	foundGraph, err := g.Graph(id)
+	if err != nil {
+		return nil, err
+	}
+	return g.graph.IncidenceMatrix(foundGraph), nil
+}
+
+func (g *Graph) AdjacencyMatrix(id uint64) (graph.AdjacencyMatrix, error) {
+	foundGraph, err := g.Graph(id)
+	if err != nil {
+		return nil, err
+	}
+	return g.graph.AdjacencyMatrix(foundGraph), nil
 }
 
 func (g *Graph) CreateGraph(graph model.Graph) (uint64, error) {

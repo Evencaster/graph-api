@@ -9,6 +9,7 @@ import (
 
 	"github.com/illfate2/graph-api/pkg/model"
 	"github.com/illfate2/graph-api/pkg/service"
+	"github.com/illfate2/graph-api/pkg/service/graph"
 )
 
 type Server struct {
@@ -27,6 +28,10 @@ func New(service service.Service) *Server {
 	r.HandleFunc("api/v1/graph/{id:[1-9]+[0-9]*}", s.Graph).Methods(http.MethodGet)
 	r.HandleFunc("api/v1/graph/{id:[1-9]+[0-9]*}", s.UpdateGraph).Methods(http.MethodPut)
 	r.HandleFunc("api/v1/graph/{id:[1-9]+[0-9]*}", s.DeleteGraph).Methods(http.MethodDelete)
+	r.HandleFunc("api/v1/graph/{id:[1-9]+[0-9]*}/adjacencyMatrix", s.AdjacencyMatrix).Methods(http.MethodGet)
+	r.HandleFunc("api/v1/graph/{id:[1-9]+[0-9]*}/incidenceMatrix", s.IncidenceMatrix).Methods(http.MethodGet)
+	r.HandleFunc("api/v1/graph/{id:[1-9]+[0-9]*}", s.Graph).Methods(http.MethodGet)
+
 	return s
 }
 
@@ -98,7 +103,44 @@ func (s *Server) DeleteGraph(w http.ResponseWriter, req *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
+}
 
+func (s *Server) IncidenceMatrix(w http.ResponseWriter, req *http.Request) {
+	id, err := getID(req)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+	m, err := s.service.IncidenceMatrix(id)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	resp := struct {
+		Matrix graph.IncidenceMatrix `json:"matrix"`
+	}{
+		Matrix: m,
+	}
+	_ = json.NewEncoder(w).Encode(resp)
+}
+
+func (s *Server) AdjacencyMatrix(w http.ResponseWriter, req *http.Request) {
+	id, err := getID(req)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+	m, err := s.service.AdjacencyMatrix(id)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	resp := struct {
+		Matrix graph.AdjacencyMatrix `json:"matrix"`
+	}{
+		Matrix: m,
+	}
+	_ = json.NewEncoder(w).Encode(resp)
 }
 
 func getID(req *http.Request) (uint64, error) {
