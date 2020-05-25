@@ -30,6 +30,8 @@ func New(service service.Service) *Server {
 	r.HandleFunc("api/v1/graph/{id:[1-9]+[0-9]*}", s.DeleteGraph).Methods(http.MethodDelete)
 	r.HandleFunc("api/v1/graph/{id:[1-9]+[0-9]*}/adjacencyMatrix", s.AdjacencyMatrix).Methods(http.MethodGet)
 	r.HandleFunc("api/v1/graph/{id:[1-9]+[0-9]*}/incidenceMatrix", s.IncidenceMatrix).Methods(http.MethodGet)
+	r.HandleFunc("api/v1/graph/{id:[1-9]+[0-9]*}/shortestPath", s.ShortestPath).
+		Queries("fromNode", "{fromNode}", "toNode", "{toNode}").Methods(http.MethodGet)
 	r.HandleFunc("api/v1/graph/{id:[1-9]+[0-9]*}", s.Graph).Methods(http.MethodGet)
 
 	return s
@@ -143,8 +145,57 @@ func (s *Server) AdjacencyMatrix(w http.ResponseWriter, req *http.Request) {
 	_ = json.NewEncoder(w).Encode(resp)
 }
 
+func (s *Server) ShortestPath(w http.ResponseWriter, req *http.Request) {
+	args, err := getShortestPathArgs(req)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+	path, err := s.service.ShortestPath(args.graphID, args.fromNode, args.toNode)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	resp := struct {
+		Path []model.Node `json:"path"`
+	}{
+		Path: path,
+	}
+	_ = json.NewEncoder(w).Encode(resp)
+}
+
 func getID(req *http.Request) (uint64, error) {
+	return getSpecificID(req, "id")
+}
+
+type shortestPathArgs struct {
+	graphID  uint64
+	fromNode uint64
+	toNode   uint64
+}
+
+func getShortestPathArgs(req *http.Request) (shortestPathArgs, error) {
+	id, err := getID(req)
+	if err != nil {
+		return shortestPathArgs{}, err
+	}
+	fromNode, err := getSpecificID(req, "fromNode")
+	if err != nil {
+		return shortestPathArgs{}, err
+	}
+	toNode, err := getSpecificID(req, "toNode")
+	if err != nil {
+		return shortestPathArgs{}, err
+	}
+	return shortestPathArgs{
+		graphID:  id,
+		fromNode: fromNode,
+		toNode:   toNode,
+	}, nil
+}
+
+func getSpecificID(req *http.Request, idName string) (uint64, error) {
 	vars := mux.Vars(req)
-	id, err := strconv.ParseUint(vars["id"], 10, 64)
+	id, err := strconv.ParseUint(vars[idName], 10, 64)
 	return id, err
 }

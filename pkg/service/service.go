@@ -10,6 +10,7 @@ type Service interface {
 	repository.Repository
 	IncidenceMatrix(id uint64) (graph.IncidenceMatrix, error)
 	AdjacencyMatrix(id uint64) (graph.AdjacencyMatrix, error)
+	ShortestPath(graphID, fromNode, toNode uint64) ([]model.Node, error)
 }
 
 type Graph struct {
@@ -38,6 +39,14 @@ func (g *Graph) AdjacencyMatrix(id uint64) (graph.AdjacencyMatrix, error) {
 		return nil, err
 	}
 	return g.graph.AdjacencyMatrix(foundGraph), nil
+}
+
+func (g *Graph) ShortestPath(graphID, fromNode, toNode uint64) ([]model.Node, error) {
+	foundGraph, err := g.Graph(graphID)
+	if err != nil {
+		return nil, err
+	}
+	return g.graph.ShortestPath(foundGraph, fromNode, toNode), nil
 }
 
 func (g *Graph) CreateGraph(graph model.Graph) (uint64, error) {

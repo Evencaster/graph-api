@@ -1,7 +1,7 @@
 package model
 
 type Graph struct {
-	ID uint64
+	ID    uint64
 	Name  string `json:"name"`
 	Edges []Edge `json:"edges"`
 }
@@ -9,6 +9,7 @@ type Graph struct {
 type NodeShape string
 
 type Node struct {
+	ID    uint64    `json:"id"`
 	Name  string    `json:"name"`
 	Shape NodeShape `json:"shape"`
 	Color string    `json:"color"`

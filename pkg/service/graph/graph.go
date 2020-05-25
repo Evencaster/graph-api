@@ -1,6 +1,11 @@
 package graph
 
-import "github.com/illfate2/graph-api/pkg/model"
+import (
+	"gonum.org/v1/gonum/graph/path"
+	"gonum.org/v1/gonum/graph/simple"
+
+	"github.com/illfate2/graph-api/pkg/model"
+)
 
 type (
 	IncidenceMatrix map[model.Edge]map[model.Node]int
@@ -10,6 +15,7 @@ type (
 type Methods interface {
 	IncidenceMatrix(graph model.Graph) IncidenceMatrix
 	AdjacencyMatrix(graph model.Graph) AdjacencyMatrix
+	ShortestPath(graph model.Graph, fromNode, toNode uint64) []model.Node
 }
 
 type Graph struct {
@@ -64,4 +70,34 @@ func (g Graph) AdjacencyMatrix(graph model.Graph) AdjacencyMatrix {
 		matrix[n] = nodeCount
 	}
 	return matrix
+}
+
+func (g Graph) ShortestPath(graph model.Graph, fromNode, toNode uint64) []model.Node {
+	shortest := path.DijkstraAllPaths(g.toUndirectedGraph(graph))
+	p, _, _ := shortest.Between(int64(fromNode), int64(toNode))
+	resPath := make([]model.Node, 0, len(p))
+
+	nodes := graphIDtoNode(graph)
+	for _, n := range p {
+		resNode := nodes[uint64(n.ID())]
+		resPath = append(resPath, resNode)
+	}
+	return resPath
+}
+
+func (g Graph) toUndirectedGraph(graph model.Graph) *simple.UndirectedGraph {
+	undirGraph := simple.NewUndirectedGraph()
+	for _, e := range graph.Edges {
+		undirGraph.Edge(int64(e.From.ID), int64(e.To.ID))
+	}
+	return undirGraph
+}
+
+func graphIDtoNode(graph model.Graph) map[uint64]model.Node {
+	nodes := make(map[uint64]model.Node)
+	for _, e := range graph.Edges {
+		nodes[e.From.ID] = e.From
+		nodes[e.To.ID] = e.To
+	}
+	return nodes
 }
