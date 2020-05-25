@@ -4,4 +4,3 @@ bin/sts:
 .PHONY: dep
 dep:
 	go mod tidy
-	go mod vendor
