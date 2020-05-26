@@ -13,6 +13,7 @@ type Service interface {
 	ShortestPath(graphID, fromNode, toNode uint64) ([]model.Node, error)
 	AllShortestPaths(graphID, fromNode, toNode uint64) ([][]model.Node, error)
 	HamiltonianPath(graphID, startedNode uint64) ([]model.Node, error)
+	EulerianCycle(graphID, startedNode uint64) ([]model.Node, error)
 }
 
 type Graph struct {
@@ -60,11 +61,21 @@ func (g *Graph) AllShortestPaths(graphID, fromNode, toNode uint64) ([][]model.No
 }
 
 func (g *Graph) HamiltonianPath(graphID, startedNode uint64) ([]model.Node, error) {
+	return g.path(graphID, startedNode, g.graph.HamiltonianPath)
+}
+
+func (g *Graph) EulerianCycle(graphID, startedNode uint64) ([]model.Node, error) {
+	return g.path(graphID, startedNode, g.graph.EulerianCycle)
+}
+
+type findPathF func(graph model.Graph, startedNode uint64) ([]model.Node, bool)
+
+func (g *Graph) path(graphID, startedNode uint64, f findPathF) ([]model.Node, error) {
 	foundGraph, err := g.Graph(graphID)
 	if err != nil {
 		return nil, err
 	}
-	path, found := g.graph.HamiltonianPath(foundGraph, startedNode)
+	path, found := f(foundGraph, startedNode)
 	if !found {
 		return nil, repository.ErrNotFound
 	}

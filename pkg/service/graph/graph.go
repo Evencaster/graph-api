@@ -18,18 +18,14 @@ type Methods interface {
 	ShortestPath(graph model.Graph, fromNode, toNode uint64) []model.Node
 	AllShortestPaths(graph model.Graph, fromNode, toNode uint64) [][]model.Node
 	HamiltonianPath(graph model.Graph, orig uint64) ([]model.Node, bool)
+	EulerianCycle(graph model.Graph, orig uint64) ([]model.Node, bool)
 }
 
 type Graph struct {
 }
 
 func (g Graph) IncidenceMatrix(graph model.Graph) IncidenceMatrix {
-	nodes := make(map[model.Node]struct{})
-	for _, e := range graph.Edges {
-		nodes[e.From] = struct{}{}
-		nodes[e.To] = struct{}{}
-	}
-
+	nodes := setNodes(graph)
 	edges := make(IncidenceMatrix)
 	for _, e := range graph.Edges {
 		mNodes := make(map[model.Node]int)
@@ -130,6 +126,63 @@ func (g Graph) HamiltonianPath(graph model.Graph, orig uint64) ([]model.Node, bo
 	return resPath, true
 }
 
+func (g Graph) EulerianCycle(graph model.Graph, startedNode uint64) ([]model.Node, bool) {
+	nodeToEdges := make(map[uint64]map[uint64]struct{})
+	for _, e := range graph.Edges {
+		nodeToEdges[e.From.ID] = make(map[uint64]struct{})
+		nodeToEdges[e.To.ID] = make(map[uint64]struct{})
+	}
+	for _, e := range graph.Edges {
+		nodeToEdges[e.From.ID][e.To.ID] = struct{}{}
+		nodeToEdges[e.To.ID][e.From.ID] = struct{}{}
+	}
+
+	unvisitedNodeToEdges := make(map[uint64]map[uint64]struct{})
+	for _, e := range graph.Edges {
+		unvisitedNodeToEdges[e.From.ID] = make(map[uint64]struct{})
+		unvisitedNodeToEdges[e.To.ID] = make(map[uint64]struct{})
+	}
+	for _, e := range graph.Edges {
+		unvisitedNodeToEdges[e.From.ID][e.To.ID] = struct{}{}
+		unvisitedNodeToEdges[e.To.ID][e.From.ID] = struct{}{}
+	}
+	for _, e := range nodeToEdges {
+		if len(e)%2 != 0 {
+			return nil, false
+		}
+	}
+
+	// Hierholzer's algorithm
+	var currentVertex, nextVertex uint64
+
+	tour := []uint64{}
+	stack := []uint64{startedNode}
+
+	for len(stack) > 0 {
+		currentVertex = stack[len(stack)-1]
+		// Get an arbitrary edge from the current vertex
+		if len(unvisitedNodeToEdges[currentVertex]) > 0 {
+			for nextVertex = range unvisitedNodeToEdges[currentVertex] {
+				break
+			}
+			delete(unvisitedNodeToEdges[currentVertex], nextVertex)
+			delete(unvisitedNodeToEdges[nextVertex], currentVertex)
+			stack = append(stack, nextVertex)
+		} else {
+			tour = append(tour, stack[len(stack)-1])
+			stack = stack[:len(stack)-1]
+		}
+	}
+
+	nodes := graphToNodes(graph)
+	resPath := make([]model.Node, 0, len(tour))
+	for _, n := range tour {
+		resNode := nodes[n]
+		resPath = append(resPath, resNode)
+	}
+	return resPath, true
+}
+
 func (g Graph) hamiltonianPath(
 	orig, dest uint64,
 	visited map[uint64]bool,
@@ -165,6 +218,15 @@ func (g Graph) toUndirectedGraph(graph model.Graph) *simple.UndirectedGraph {
 		undirGraph.Edge(int64(e.From.ID), int64(e.To.ID))
 	}
 	return undirGraph
+}
+
+func setNodes(graph model.Graph) map[model.Node]struct{} {
+	nodes := make(map[model.Node]struct{})
+	for _, e := range graph.Edges {
+		nodes[e.From] = struct{}{}
+		nodes[e.To] = struct{}{}
+	}
+	return nodes
 }
 
 func graphToNodes(graph model.Graph) map[uint64]model.Node {

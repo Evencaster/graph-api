@@ -168,6 +168,35 @@ func (s *Server) ShortestPath(w http.ResponseWriter, req *http.Request) {
 	_ = json.NewEncoder(w).Encode(resp)
 }
 
+func (s *Server) HamiltonianPath(w http.ResponseWriter, req *http.Request) {
+	s.path(w, req, s.service.HamiltonianPath)
+}
+
+func (s *Server) EulerianCycle(w http.ResponseWriter, req *http.Request) {
+	s.path(w, req, s.service.EulerianCycle)
+}
+
+type pathF func(graphID, startedNode uint64) ([]model.Node, error)
+
+func (s *Server) path(w http.ResponseWriter, req *http.Request, f pathF) {
+	args, err := getPathArgs(req)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+	path, err := f(args.graphID, args.startedNode)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	resp := struct {
+		Path []model.Node `json:"path"`
+	}{
+		Path: path,
+	}
+	_ = json.NewEncoder(w).Encode(resp)
+}
+
 func (s *Server) AllShortestPaths(w http.ResponseWriter, req *http.Request) {
 	args, err := getShortestPathArgs(req)
 	if err != nil {
@@ -181,25 +210,6 @@ func (s *Server) AllShortestPaths(w http.ResponseWriter, req *http.Request) {
 	}
 	resp := struct {
 		Path [][]model.Node `json:"paths"`
-	}{
-		Path: path,
-	}
-	_ = json.NewEncoder(w).Encode(resp)
-}
-
-func (s *Server) HamiltonianPath(w http.ResponseWriter, req *http.Request) {
-	args, err := getHamiltonPathArgs(req)
-	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		return
-	}
-	path, err := s.service.HamiltonianPath(args.graphID, args.startedNode)
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-	resp := struct {
-		Path []model.Node `json:"path"`
 	}{
 		Path: path,
 	}
@@ -236,21 +246,21 @@ func getShortestPathArgs(req *http.Request) (shortestPathArgs, error) {
 	}, nil
 }
 
-type hamiltonPathArgs struct {
+type pathArgs struct {
 	graphID     uint64
 	startedNode uint64
 }
 
-func getHamiltonPathArgs(req *http.Request) (hamiltonPathArgs, error) {
+func getPathArgs(req *http.Request) (pathArgs, error) {
 	id, err := getID(req)
 	if err != nil {
-		return hamiltonPathArgs{}, err
+		return pathArgs{}, err
 	}
 	startedNode, err := getSpecificID(req, "startedNode")
 	if err != nil {
-		return hamiltonPathArgs{}, err
+		return pathArgs{}, err
 	}
-	return hamiltonPathArgs{
+	return pathArgs{
 		graphID:     id,
 		startedNode: startedNode,
 	}, nil
