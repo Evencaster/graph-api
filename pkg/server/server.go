@@ -14,31 +14,30 @@ import (
 
 type Server struct {
 	http.Handler
-	r       *mux.Router
 	service service.Service
 }
 
 func New(service service.Service) *Server {
 	r := mux.NewRouter()
-	s := &Server{
-		r:       r,
+	s := Server{
 		service: service,
+		Handler: r,
 	}
-	r.HandleFunc("api/v1/graph", s.CreateGraph).Methods(http.MethodPost)
-	r.HandleFunc("api/v1/graph/{id:[1-9]+[0-9]*}", s.Graph).Methods(http.MethodGet)
-	r.HandleFunc("api/v1/graph/{id:[1-9]+[0-9]*}", s.UpdateGraph).Methods(http.MethodPut)
-	r.HandleFunc("api/v1/graph/{id:[1-9]+[0-9]*}", s.DeleteGraph).Methods(http.MethodDelete)
-	r.HandleFunc("api/v1/graph/{id:[1-9]+[0-9]*}/adjacencyMatrix", s.AdjacencyMatrix).Methods(http.MethodGet)
-	r.HandleFunc("api/v1/graph/{id:[1-9]+[0-9]*}/incidenceMatrix", s.IncidenceMatrix).Methods(http.MethodGet)
-	r.HandleFunc("api/v1/graph/{id:[1-9]+[0-9]*}/shortestPath", s.ShortestPath).
+	r.HandleFunc("/api/v1/graph", s.CreateGraph).Methods(http.MethodPost)
+	r.HandleFunc("/api/v1/graph/{id:[1-9]+[0-9]*}", s.Graph).Methods(http.MethodGet)
+	r.HandleFunc("/api/v1/graph/{id:[1-9]+[0-9]*}", s.UpdateGraph).Methods(http.MethodPut)
+	r.HandleFunc("/api/v1/graph/{id:[1-9]+[0-9]*}", s.DeleteGraph).Methods(http.MethodDelete)
+	r.HandleFunc("/api/v1/graph/{id:[1-9]+[0-9]*}/adjacencyMatrix", s.AdjacencyMatrix).Methods(http.MethodGet)
+	r.HandleFunc("/api/v1/graph/{id:[1-9]+[0-9]*}/incidenceMatrix", s.IncidenceMatrix).Methods(http.MethodGet)
+	r.HandleFunc("/api/v1/graph/{id:[1-9]+[0-9]*}/shortestPath", s.ShortestPath).
 		Queries("fromNode", "{fromNode}", "toNode", "{toNode}").Methods(http.MethodGet)
-	r.HandleFunc("api/v1/graph/{id:[1-9]+[0-9]*}/allShortestPath", s.AllShortestPaths).
-		Queries("fromNode", "{fromNode}", "toNode", "{toNode}").Methods(http.MethodGet)
-	r.HandleFunc("api/v1/graph/{id:[1-9]+[0-9]*}/hamiltonianPath", s.HamiltonianPath).
-		Queries("startNode", "{startNode}").Methods(http.MethodGet)
-	r.HandleFunc("api/v1/graph/{id:[1-9]+[0-9]*}", s.Graph).Methods(http.MethodGet)
 
-	return s
+	r.HandleFunc("/api/v1/graph/{id:[1-9]+[0-9]*}/allShortestPath", s.AllShortestPaths).
+		Queries("fromNode", "{fromNode}", "toNode", "{toNode}").Methods(http.MethodGet)
+
+	r.HandleFunc("/api/v1/graph/{id:[1-9]+[0-9]*}/hamiltonianPath", s.HamiltonianPath).
+		Queries("startNode", "{startNode}").Methods(http.MethodGet)
+	return &s
 }
 
 func (s *Server) CreateGraph(w http.ResponseWriter, req *http.Request) {
