@@ -120,7 +120,7 @@ func (g Graph) HamiltonianPath(graph model.Graph, orig uint64) ([]model.Node, bo
 	}
 	nodes := graphToNodes(graph)
 	resPath := make([]model.Node, 0, len(hamiltonPath))
-	for _, n := range path {
+	for _, n := range hamiltonPath {
 		resNode := nodes[n]
 		resPath = append(resPath, resNode)
 	}
