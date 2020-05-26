@@ -19,6 +19,7 @@ type Methods interface {
 	AllShortestPaths(graph model.Graph, fromNode, toNode uint64) [][]model.Node
 	HamiltonianPath(graph model.Graph, orig uint64) ([]model.Node, bool)
 	EulerianCycle(graph model.Graph, orig uint64) ([]model.Node, bool)
+	Cartesian(first, second model.Graph) model.Graph
 }
 
 type Graph struct {
@@ -71,7 +72,7 @@ func (g Graph) AdjacencyMatrix(graph model.Graph) AdjacencyMatrix {
 }
 
 func (g Graph) ShortestPath(graph model.Graph, fromNode, toNode uint64) []model.Node {
-	shortest := path.DijkstraAllPaths(g.toUndirectedGraph(graph))
+	shortest := path.DijkstraAllPaths(toUndirectedGraph(graph))
 	p, _, _ := shortest.Between(int64(fromNode), int64(toNode))
 	resPath := make([]model.Node, 0, len(p))
 
@@ -84,7 +85,7 @@ func (g Graph) ShortestPath(graph model.Graph, fromNode, toNode uint64) []model.
 }
 
 func (g Graph) AllShortestPaths(graph model.Graph, fromNode, toNode uint64) [][]model.Node {
-	shortest := path.DijkstraAllPaths(g.toUndirectedGraph(graph))
+	shortest := path.DijkstraAllPaths(toUndirectedGraph(graph))
 	p, _ := shortest.AllBetween(int64(fromNode), int64(toNode))
 	resPaths := make([][]model.Node, 0, len(p))
 
@@ -212,10 +213,18 @@ func (g Graph) hamiltonianPath(
 	return nil, false
 }
 
-func (g Graph) toUndirectedGraph(graph model.Graph) *simple.UndirectedGraph {
+func (g Graph) Cartesian(first, second model.Graph) model.Graph {
+	return model.Graph{}
+}
+
+func toUndirectedGraph(g model.Graph) *simple.UndirectedGraph {
 	undirGraph := simple.NewUndirectedGraph()
-	for _, e := range graph.Edges {
-		undirGraph.Edge(int64(e.From.ID), int64(e.To.ID))
+
+	for _, e := range g.Edges {
+		undirGraph.SetEdge(simple.Edge{
+			F: simple.Node(e.From.ID),
+			T: simple.Node(e.To.ID),
+		})
 	}
 	return undirGraph
 }
