@@ -14,6 +14,7 @@ type (
 
 type Methods interface {
 	IncidenceMatrix(graph model.Graph) IncidenceMatrix
+	PlanarCheck(graph model.Graph) bool
 	AdjacencyMatrix(graph model.Graph) AdjacencyMatrix
 	ShortestPath(graph model.Graph, fromNode, toNode uint64) []model.Node
 	AllShortestPaths(graph model.Graph, fromNode, toNode uint64) [][]model.Node
@@ -25,18 +26,37 @@ type Methods interface {
 type Graph struct {
 }
 
+func (g Graph) PlanarCheck(graph model.Graph) bool {
+	if len(graph.Edges) <= (3 * len(setNodes(graph)) - 6){
+		return true
+	}
+	return false
+}
+
 func (g Graph) IncidenceMatrix(graph model.Graph) IncidenceMatrix {
 	nodes := setNodes(graph)
 	edges := make(IncidenceMatrix)
 	for _, e := range graph.Edges {
 		mNodes := make(map[model.Node]int)
 		for n := range nodes {
-			mNodes[n] = 0
-			if e.From == n {
-				mNodes[n] = 1
-			}
-			if e.To == n {
-				mNodes[n] = 1
+			if e.IsDirected {
+				mNodes[n] = 0
+				if e.From == n {
+					mNodes[n] = 1
+				}
+				if e.To == n {
+					if mNodes[n] == 0 {
+						mNodes[n] = -1
+					}
+				}
+			} else{
+				mNodes[n] = 0
+				if e.From == n {
+					mNodes[n] = 1
+				}
+				if e.To == n {
+					mNodes[n] = 1
+				}
 			}
 		}
 		edges[e] = mNodes
@@ -51,8 +71,12 @@ func (g Graph) AdjacencyMatrix(graph model.Graph) AdjacencyMatrix {
 		nodes[e.To] = []model.Node{}
 	}
 	for _, e := range graph.Edges {
-		nodes[e.From] = append(nodes[e.From], e.To)
-		nodes[e.To] = append(nodes[e.To], e.From)
+		if e.IsDirected{
+			nodes[e.From] = append(nodes[e.From], e.To)
+		} else {
+			nodes[e.From] = append(nodes[e.From], e.To)
+			nodes[e.To] = append(nodes[e.To], e.From)
+		}
 	}
 	matrix := make(AdjacencyMatrix)
 	for n, s := range nodes {

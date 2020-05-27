@@ -38,6 +38,8 @@ func New(service service.Service) *Server {
 
 	r.HandleFunc("/api/v1/graph/{id:[1-9]+[0-9]*}/hamiltonianPath", s.HamiltonianPath).
 		Queries("startNode", "{startNode}").Methods(http.MethodGet)
+
+	r.HandleFunc("/api/v1/graph/{id:[1-9]+[0-9]*}/planarCheck", s.PlanarCheck).Methods(http.MethodGet)
 	return &s
 }
 
@@ -166,6 +168,10 @@ func (s *Server) ShortestPath(w http.ResponseWriter, req *http.Request) {
 		Path: path,
 	}
 	_ = json.NewEncoder(w).Encode(resp)
+}
+
+func (s *Server) PlanarCheck(w http.ResponseWriter, req *http.Request){
+	s.path(w, req, s.service.PlanarCheck)
 }
 
 func (s *Server) HamiltonianPath(w http.ResponseWriter, req *http.Request) {

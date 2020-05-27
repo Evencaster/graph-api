@@ -10,6 +10,7 @@ type Service interface {
 	repository.Repository
 	IncidenceMatrix(id uint64) (graph.IncidenceMatrix, error)
 	AdjacencyMatrix(id uint64) (graph.AdjacencyMatrix, error)
+	PlanarCheck(id uint64) (bool, error)
 	ShortestPath(graphID, fromNode, toNode uint64) ([]model.Node, error)
 	AllShortestPaths(graphID, fromNode, toNode uint64) ([][]model.Node, error)
 	HamiltonianPath(graphID, startedNode uint64) ([]model.Node, error)
@@ -26,6 +27,14 @@ func NewGraph(repo repository.Repository) *Graph {
 		repository: repo,
 		graph:      graph.Graph{},
 	}
+}
+
+func (g *Graph) PlanarCheck(id uint64) (bool, error){
+	foundGraph, err := g.Graph(id)
+	if err != nil {
+		return false, err
+	}
+	return g.graph.PlanarCheck(foundGraph), nil
 }
 
 func (g *Graph) IncidenceMatrix(id uint64) (graph.IncidenceMatrix, error) {
