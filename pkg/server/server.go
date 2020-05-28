@@ -2,6 +2,7 @@ package server
 
 import (
 	"encoding/json"
+	"log"
 	"net/http"
 	"strconv"
 
@@ -48,11 +49,13 @@ func (s *Server) CreateGraph(w http.ResponseWriter, req *http.Request) {
 	err := json.NewDecoder(req.Body).Decode(&g)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
+		log.Print("Error when decoding JSON: ", err)
 		return
 	}
 	id, err := s.service.CreateGraph(g)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
+		log.Print("Error when creating graph: ", err)
 		return
 	}
 	resp := struct {
