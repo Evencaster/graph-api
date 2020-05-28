@@ -171,7 +171,22 @@ func (s *Server) ShortestPath(w http.ResponseWriter, req *http.Request) {
 }
 
 func (s *Server) PlanarCheck(w http.ResponseWriter, req *http.Request){
-	s.path(w, req, s.service.PlanarCheck)
+	id, err := getID(req)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+	res, err := s.service.PlanarCheck(id)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	resp := struct {
+		IsPlanar bool `json:"isPlanar"`
+	}{
+		IsPlanar: res,
+	}
+	_ = json.NewEncoder(w).Encode(resp)
 }
 
 func (s *Server) HamiltonianPath(w http.ResponseWriter, req *http.Request) {

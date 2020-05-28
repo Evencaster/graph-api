@@ -4,3 +4,7 @@ bin/sts:
 .PHONY: dep
 dep:
 	go mod tidy
+
+.Phony: test
+test:
+	go test -v -race ./...
