@@ -1,7 +1,7 @@
 package graph
 
 import (
-	"gonum.org/v1/gonum/graph/path"
+	"github.com/illfate2/graph-api/pkg/service/graph/paths"
 	"gonum.org/v1/gonum/graph/simple"
 
 	"github.com/illfate2/graph-api/pkg/model"
@@ -96,33 +96,32 @@ func (g Graph) AdjacencyMatrix(graph model.Graph) AdjacencyMatrix {
 }
 
 func (g Graph) ShortestPath(graph model.Graph, fromNode, toNode uint64) []model.Node {
-	shortest := path.DijkstraAllPaths(toUndirectedGraph(graph))
-	p, _, _ := shortest.Between(int64(fromNode), int64(toNode))
-	resPath := make([]model.Node, 0, len(p))
-
-	nodes := graphToNodes(graph)
-	for _, n := range p {
-		resNode := nodes[uint64(n.ID())]
-		resPath = append(resPath, resNode)
+	matrix := g.AdjacencyMatrix(graph)
+	nodes := setNodes(graph)
+	var currentNode model.Node
+	for node := range nodes{
+		if node.ID == fromNode{
+			currentNode = node
+			break
+		}
 	}
-	return resPath
+
+	shortestPaths := paths.AllShortestPathsFind(nodes, matrix, currentNode, toNode)
+	return shortestPaths[0]
 }
 
 func (g Graph) AllShortestPaths(graph model.Graph, fromNode, toNode uint64) [][]model.Node {
-	shortest := path.DijkstraAllPaths(toUndirectedGraph(graph))
-	p, _ := shortest.AllBetween(int64(fromNode), int64(toNode))
-	resPaths := make([][]model.Node, 0, len(p))
-
-	nodes := graphToNodes(graph)
-	for i := range p {
-		resPath := make([]model.Node, 0)
-		for _, n := range p[i] {
-			resNode := nodes[uint64(n.ID())]
-			resPath = append(resPath, resNode)
+	matrix := g.AdjacencyMatrix(graph)
+	nodes := setNodes(graph)
+	var currentNode model.Node
+	for node := range nodes{
+		if node.ID == fromNode{
+			currentNode = node
+			break
 		}
-		resPaths = append(resPaths, resPath)
 	}
-	return resPaths
+
+	return paths.AllShortestPathsFind(nodes, matrix, currentNode, toNode)
 }
 
 func (g Graph) HamiltonianPath(graph model.Graph, orig uint64) ([]model.Node, bool) {
