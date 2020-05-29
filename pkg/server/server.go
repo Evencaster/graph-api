@@ -24,7 +24,10 @@ func New(service service.Service) *Server {
 		service: service,
 		Handler: r,
 	}
+
+	r.Methods(http.MethodOptions).HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {})
 	r.Use(CORS)
+
 	r.HandleFunc("/api/v1/graph", s.CreateGraph).Methods(http.MethodPost)
 	r.HandleFunc("/api/v1/graph/{id:[1-9]+[0-9]*}", s.Graph).Methods(http.MethodGet)
 	r.HandleFunc("/api/v1/graph/{id:[1-9]+[0-9]*}", s.UpdateGraph).Methods(http.MethodPut)
