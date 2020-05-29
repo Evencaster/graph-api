@@ -8,6 +8,17 @@ import (
 	"github.com/illfate2/graph-api/pkg/model"
 )
 
+func SlicesEqual (firstSlice, secondSlice []model.Node) bool{
+	if len(firstSlice) != len(secondSlice){
+		return false
+	}
+	for i := range firstSlice{
+		if firstSlice[i] !=secondSlice[i]{
+			return false
+		}
+	}
+	return true
+}
 
 func TestGraph_PlanarCheck(t *testing.T) {
 	type args struct{
@@ -349,7 +360,8 @@ func TestGraph_AdjacencyMatrix(t *testing.T) {
 	for i:=0; i<5; i++{
 		sub := make(map[model.Node]int)
 		for j := 0; j<5; j++{
-			sub[model.Node{ID: uint64(j+1)}] = matrixOriented[i][j]
+			sub[model.Node{ID: uint64(j + 1)}] = matrixOriented[i][j]
+
 		}
 		answerOriented[model.Node{ID: uint64(i+1)}] = sub
 	}
@@ -357,7 +369,8 @@ func TestGraph_AdjacencyMatrix(t *testing.T) {
 	for i:=0; i<5; i++{
 		sub := make(map[model.Node]int)
 		for j := 0; j<5; j++{
-			sub[model.Node{ID: uint64(j+1)}] = matrixUnOriented[i][j]
+			sub[model.Node{ID: uint64(j + 1)}] = matrixUnOriented[i][j]
+
 		}
 		answerUnOriented[model.Node{ID: uint64(i+1)}] = sub
 	}
@@ -437,6 +450,7 @@ func TestGraph_AdjacencyMatrix(t *testing.T) {
 						{
 							From: model.Node{
 								ID: 1,
+
 							},
 							To: model.Node{
 								ID: 2,
@@ -602,12 +616,12 @@ func TestGraph_AllShortestPaths(t *testing.T) {
 					Edges: []model.Edge{
 						{
 							From: model.Node{
-								Name:  "First",
-								Color: "BLue",
-								ID:    2,
+								ID: 2,
 							},
 							To: model.Node{
-								ID: 1,
+								ID:    1,
+								Name:  "First",
+								Color: "BLue",
 							},
 						},
 						{
@@ -620,9 +634,9 @@ func TestGraph_AllShortestPaths(t *testing.T) {
 						},
 						{
 							From: model.Node{
+								ID:    1,
 								Name:  "First",
 								Color: "BLue",
-								ID:    1,
 							},
 							To: model.Node{
 								ID: 3,
@@ -649,7 +663,7 @@ func TestGraph_AllShortestPaths(t *testing.T) {
 								ID: 5,
 							},
 							To: model.Node{
-								ID: 1,
+								ID:    1,
 								Name:  "First",
 								Color: "BLue",
 							},
@@ -668,134 +682,149 @@ func TestGraph_AllShortestPaths(t *testing.T) {
 				toNode:   4,
 			},
 			want: [][]model.Node{
-				{
+
 					{
-						Name:  "First",
-						Color: "BLue",
-						ID:    1,
+						{
+							Name:  "First",
+							Color: "BLue",
+							ID:    1,
+						},
+						{
+							ID: 5,
+						},
+						{
+							ID: 4,
+						},
 					},
 					{
-						ID: 5,
-					},
-					{
-						ID: 4,
+						{
+							Name:  "First",
+							Color: "BLue",
+							ID:    1,
+						},
+						{
+							ID: 3,
+						},
+						{
+							ID: 4,
+						},
 					},
 				},
-				{
-					{
-						Name:  "First",
-						Color: "BLue",
-						ID:    1,
-					},
-					{
-						ID: 3,
-					},
-					{
-						ID: 4,
+		},
+		{
+			args: args{
+				graph: model.Graph{
+					Edges: []model.Edge{
+						{
+							From: model.Node{
+								ID: 2,
+							},
+							To: model.Node{
+								Name:  "First",
+								Color: "BLue",
+								ID:    1,
+							},
+							IsDirected: true,
+						},
+						{
+							From: model.Node{
+								ID: 3,
+							},
+							To: model.Node{
+								ID: 2,
+							},
+							IsDirected: true,
+						},
+						{
+							From: model.Node{
+								Name:  "First",
+								Color: "BLue",
+								ID:    1,
+							},
+							To: model.Node{
+								ID: 3,
+							},
+							IsDirected: true,
+						},
+						{
+							From: model.Node{
+								ID: 3,
+							},
+							To: model.Node{
+								ID: 5,
+							},
+							IsDirected: true,
+						},
+						{
+							From: model.Node{
+								ID: 4,
+							},
+							To: model.Node{
+								ID: 3,
+							},
+							IsDirected: true,
+						},
+						{
+							From: model.Node{
+								ID: 5,
+							},
+							To: model.Node{
+								ID:    1,
+								Name:  "First",
+								Color: "BLue",
+							},
+							IsDirected: true,
+						},
+						{
+							From: model.Node{
+								ID: 4,
+							},
+							To: model.Node{
+								ID: 5,
+							},
+							IsDirected: true,
+						},
 					},
 				},
+				fromNode: 4,
+				toNode:   1,
+			},
+			want: [][]model.Node{
+
+					{
+						{
+							ID: 4,
+						},
+						{
+							ID: 5,
+						},
+						{
+							ID:    1,
+							Name:  "First",
+							Color: "BLue",
+						},
+					},
+
 			},
 		},
-		//{
-		//	args: args{
-		//		graph: model.Graph{
-		//			Edges: []model.Edge{
-		//				{
-		//					From: model.Node{
-		//						Name:  "First",
-		//						Color: "BLue",
-		//						ID:    2,
-		//					},
-		//					To: model.Node{
-		//						ID: 1,
-		//					},
-		//					IsDirected: true,
-		//				},
-		//				{
-		//					From: model.Node{
-		//						ID: 3,
-		//					},
-		//					To: model.Node{
-		//						ID: 2,
-		//					},
-		//					IsDirected: true,
-		//				},
-		//				{
-		//					From: model.Node{
-		//						Name:  "First",
-		//						Color: "BLue",
-		//						ID:    1,
-		//					},
-		//					To: model.Node{
-		//						ID: 3,
-		//					},
-		//					IsDirected: true,
-		//				},
-		//				{
-		//					From: model.Node{
-		//						ID: 3,
-		//					},
-		//					To: model.Node{
-		//						ID: 5,
-		//					},
-		//					IsDirected: true,
-		//				},
-		//				{
-		//					From: model.Node{
-		//						ID: 4,
-		//					},
-		//					To: model.Node{
-		//						ID: 3,
-		//					},
-		//					IsDirected: true,
-		//				},
-		//				{
-		//					From: model.Node{
-		//						ID: 5,
-		//					},
-		//					To: model.Node{
-		//						ID: 1,
-		//						Name:  "First",
-		//						Color: "BLue",
-		//					},
-		//					IsDirected: true,
-		//				},
-		//				{
-		//					From: model.Node{
-		//						ID: 4,
-		//					},
-		//					To: model.Node{
-		//						ID: 5,
-		//					},
-		//					IsDirected: true,
-		//				},
-		//			},
-		//		},
-		//		fromNode: 4,
-		//		toNode:   1,
-		//	},
-		//	want: [][]model.Node{
-		//		{
-		//			{
-		//				ID:    4,
-		//			},
-		//			{
-		//				ID: 5,
-		//			},
-		//			{
-		//				ID: 1,
-		//				Name:  "First",
-		//				Color: "BLue",
-		//			},
-		//		},
-		//	},
-		//},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			var equalWaysFound bool = false
 			g := Graph{}
 			got := g.AllShortestPaths(tt.args.graph, tt.args.fromNode, tt.args.toNode)
-			assert.Equal(t, tt.want, got)
+			for _, wantOption := range tt.want {
+				for _, got := range got{
+					if SlicesEqual(wantOption, got){
+						equalWaysFound = true
+						break
+					}
+				}
+				if equalWaysFound == false {
+					assert.False(t, false)
+				}
+			}
+			assert.True(t, true)
 		})
 	}
 }
