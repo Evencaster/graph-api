@@ -30,6 +30,7 @@ type Methods interface {
 	HamiltonianPath(graph model.Graph, orig uint64) ([]model.Node, bool)
 	EulerianCycle(graph model.Graph, orig uint64) ([]model.Node, bool)
 	Cartesian(first, second model.Graph) model.Graph
+	IsTree(graph model.Graph) bool
 }
 
 type Graph struct {
@@ -356,6 +357,60 @@ func (g Graph) Cartesian(firstGraph, secondGraph model.Graph) model.Graph {
 	return cartesian
 }
 
+func (g Graph) IsTree(graph model.Graph) bool {
+	visited := make(map[uint64]bool)
+
+	if isCycle(0, visited, -1, nodeToAllNodes(graph)) {
+		return false
+	}
+
+	for _, k := range visited {
+		if !k {
+			return false
+		}
+	}
+	return true
+}
+
+func isCycle(v uint64, visited map[uint64]bool, parent int64, nodeToNodes map[uint64][]uint64) bool {
+	visited[v] = true
+	for _, n := range nodeToNodes[v] {
+		if !visited[n] {
+			if isCycle(n, visited, int64(v), nodeToNodes) {
+				return true
+			}
+		} else if int64(n) != parent {
+			return true
+		}
+	}
+	return false
+}
+
+func nodeToAllNodes(graph model.Graph) map[uint64][]uint64 {
+	nodeToEdges := make(map[uint64]map[uint64]struct{})
+	for _, e := range graph.Edges {
+		nodeToEdges[e.From.ID] = make(map[uint64]struct{})
+		nodeToEdges[e.To.ID] = make(map[uint64]struct{})
+	}
+	for _, e := range graph.Edges {
+		nodeToEdges[e.From.ID][e.To.ID] = struct{}{}
+		nodeToEdges[e.To.ID][e.From.ID] = struct{}{}
+	}
+
+	nodeToSorted := make(map[uint64][]uint64)
+	for k := range nodeToEdges {
+		nodes := make([]uint64, 0, len(nodeToEdges[k]))
+		for k := range nodeToEdges[k] {
+			nodes = append(nodes, k)
+		}
+		sort.Slice(nodes, func(i, j int) bool {
+			return nodes[i] < nodes[j]
+		})
+		nodeToSorted[k] = nodes
+	}
+	return nodeToSorted
+}
+
 func toUndirectedGraph(g model.Graph) *simple.UndirectedGraph {
 	undirGraph := simple.NewUndirectedGraph()
 
@@ -403,6 +458,19 @@ func setNodes(graph model.Graph) map[model.Node]struct{} {
 		nodes[e.From] = struct{}{}
 		nodes[e.To] = struct{}{}
 	}
+	return nodes
+}
+
+func getSortedNodes(graph model.Graph) []model.Node {
+	set := setNodes(graph)
+	nodes := make([]model.Node, 0, len(set))
+	for k := range set {
+		nodes = append(nodes, k)
+	}
+
+	sort.Slice(nodes, func(i, j int) bool {
+		return nodes[i].ID < nodes[j].ID
+	})
 	return nodes
 }
 
