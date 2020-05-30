@@ -46,7 +46,7 @@ func New(service service.Service) *Server {
 		Queries("startNode", "{startNode}").Methods(http.MethodGet)
 
 	r.HandleFunc("/api/v1/graph/{id:[1-9]+[0-9]*}/planarCheck", s.PlanarCheck).Methods(http.MethodGet)
-	r.HandleFunc("/api/v1/graph/{id:[1-9]+[0-9]*}/planarCheck", s.IsTree).Methods(http.MethodGet)
+	r.HandleFunc("/api/v1/graph/{id:[1-9]+[0-9]*}/isTree", s.IsTree).Methods(http.MethodGet)
 	r.HandleFunc("/api/v1/graph/list", s.GraphList).Methods(http.MethodGet)
 	return &s
 }
