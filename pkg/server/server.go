@@ -33,6 +33,8 @@ func New(service service.Service) *Server {
 	r.HandleFunc("/api/v1/graph/{id:[1-9]+[0-9]*}/diameter", s.FindDiameter).Methods(http.MethodGet)
 	r.HandleFunc("/api/v1/graph/{id:[1-9]+[0-9]*}/radius", s.FindRadius).Methods(http.MethodGet)
 	r.HandleFunc("/api/v1/graph/{id:[1-9]+[0-9]*}/center", s.FindCenter).Methods(http.MethodGet)
+	r.HandleFunc("/api/v1/graph/{id:[1-9]+[0-9]*}/cartesian", s.Cartesian).Methods(http.MethodGet)
+
 	r.HandleFunc("/api/v1/graph/{id:[1-9]+[0-9]*}/shortestPath", s.ShortestPath).
 		Queries("fromNode", "{fromNode}", "toNode", "{toNode}").Methods(http.MethodGet)
 
@@ -198,6 +200,27 @@ func (s *Server) FindDiameter(w http.ResponseWriter, req *http.Request) {
 		Diameter uint64 `json:"diameter"`
 	}{
 		Diameter: d,
+	}
+	_ = json.NewEncoder(w).Encode(resp)
+}
+
+func (s *Server) Cartesian(w http.ResponseWriter, req *http.Request) {
+	firstID, err := getID(req)
+	secondID, err := getID(req)
+
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+	c, err := s.service.Cartesian(firstID, secondID)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	resp := struct {
+		Cartesian model.Graph `json:"cartesian"`
+	}{
+		Cartesian: c,
 	}
 	_ = json.NewEncoder(w).Encode(resp)
 }

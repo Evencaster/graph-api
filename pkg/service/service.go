@@ -18,6 +18,7 @@ type Service interface {
 	AllShortestPaths(graphID, fromNode, toNode uint64) ([][]model.Node, error)
 	HamiltonianPath(graphID, startedNode uint64) ([]model.Node, error)
 	EulerianCycle(graphID, startedNode uint64) ([]model.Node, error)
+	Cartesian(firstGraphID, secondGraphID uint64) (model.Graph, error)
 }
 
 type Graph struct {
@@ -38,6 +39,18 @@ func (g *Graph) PlanarCheck(id uint64) (bool, error) {
 		return false, err
 	}
 	return g.graph.PlanarCheck(foundGraph), nil
+}
+
+func (g *Graph) Cartesian(firstGraphID, secondGraphID uint64) (model.Graph, error) {
+	firstGraph, err := g.Graph(firstGraphID)
+	if err != nil {
+		return model.Graph{}, err
+	}
+	secondGraph, err := g.Graph(secondGraphID)
+	if err != nil {
+		return model.Graph{}, err
+	}
+	return g.graph.Cartesian(firstGraph, secondGraph), nil
 }
 
 func (g *Graph) FindDiameter(id uint64) (uint64, error) {
