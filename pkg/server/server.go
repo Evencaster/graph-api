@@ -30,6 +30,9 @@ func New(service service.Service) *Server {
 	r.HandleFunc("/api/v1/graph/{id:[1-9]+[0-9]*}", s.DeleteGraph).Methods(http.MethodDelete)
 	r.HandleFunc("/api/v1/graph/{id:[1-9]+[0-9]*}/adjacencyMatrix", s.AdjacencyMatrix).Methods(http.MethodGet)
 	r.HandleFunc("/api/v1/graph/{id:[1-9]+[0-9]*}/incidenceMatrix", s.IncidenceMatrix).Methods(http.MethodGet)
+	r.HandleFunc("/api/v1/graph/{id:[1-9]+[0-9]*}/diameter", s.FindDiameter).Methods(http.MethodGet)
+	r.HandleFunc("/api/v1/graph/{id:[1-9]+[0-9]*}/radius", s.FindRadius).Methods(http.MethodGet)
+	r.HandleFunc("/api/v1/graph/{id:[1-9]+[0-9]*}/center", s.FindCenter).Methods(http.MethodGet)
 	r.HandleFunc("/api/v1/graph/{id:[1-9]+[0-9]*}/shortestPath", s.ShortestPath).
 		Queries("fromNode", "{fromNode}", "toNode", "{toNode}").Methods(http.MethodGet)
 
@@ -170,7 +173,64 @@ func (s *Server) ShortestPath(w http.ResponseWriter, req *http.Request) {
 	_ = json.NewEncoder(w).Encode(resp)
 }
 
-func (s *Server) PlanarCheck(w http.ResponseWriter, req *http.Request){
+func (s *Server) FindDiameter(w http.ResponseWriter, req *http.Request) {
+	id, err := getID(req)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+	d, err := s.service.FindDiameter(id)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	resp := struct {
+		Diameter uint64 `json:"diameter"`
+	}{
+		Diameter: d,
+	}
+	_ = json.NewEncoder(w).Encode(resp)
+}
+
+func (s *Server) FindCenter(w http.ResponseWriter, req *http.Request) {
+	id, err := getID(req)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+	c, err := s.service.FindCenter(id)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	resp := struct {
+		Diameter []model.Node `json:"center"`
+	}{
+		Diameter: c,
+	}
+	_ = json.NewEncoder(w).Encode(resp)
+}
+
+func (s *Server) FindRadius(w http.ResponseWriter, req *http.Request) {
+	id, err := getID(req)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+	r, err := s.service.FindRadius(id)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	resp := struct {
+		Diameter uint64 `json:"radius"`
+	}{
+		Diameter: r,
+	}
+	_ = json.NewEncoder(w).Encode(resp)
+}
+
+func (s *Server) PlanarCheck(w http.ResponseWriter, req *http.Request) {
 	id, err := getID(req)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)

@@ -8,20 +8,29 @@ import (
 	"github.com/illfate2/graph-api/pkg/model"
 )
 
-func SlicesEqual (firstSlice, secondSlice []model.Node) bool{
-	if len(firstSlice) != len(secondSlice){
+func SlicesEqual(firstSlice, secondSlice []model.Node) bool {
+	if len(firstSlice) != len(secondSlice) {
 		return false
 	}
-	for i := range firstSlice{
-		if firstSlice[i] !=secondSlice[i]{
+	for i := range firstSlice {
+		if firstSlice[i] != secondSlice[i] {
 			return false
 		}
 	}
 	return true
 }
 
+func nodeInSlice(a model.Node, list []model.Node) bool {
+	for _, b := range list {
+		if b == a {
+			return true
+		}
+	}
+	return false
+}
+
 func TestGraph_PlanarCheck(t *testing.T) {
-	type args struct{
+	type args struct {
 		graph model.Graph
 	}
 
@@ -101,7 +110,7 @@ func TestGraph_PlanarCheck(t *testing.T) {
 		},
 	}
 
-	for _, test := range tests{
+	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
 			g := Graph{}
 			got := g.PlanarCheck(test.args.graph)
@@ -112,7 +121,7 @@ func TestGraph_PlanarCheck(t *testing.T) {
 }
 
 func TestGraph_IncidenceMatrix(t *testing.T) {
-	type args struct{
+	type args struct {
 		graph model.Graph
 	}
 	answerOriented := make(map[model.Edge]map[model.Node]int)
@@ -138,9 +147,9 @@ func TestGraph_IncidenceMatrix(t *testing.T) {
 
 	edgeList := []model.Edge{
 		{
-		Name: "1",
-		From: model.Node{ID: 1},
-		To:   model.Node{ID: 2},
+			Name: "1",
+			From: model.Node{ID: 1},
+			To:   model.Node{ID: 2},
 		},
 		{
 			Name: "2",
@@ -169,18 +178,18 @@ func TestGraph_IncidenceMatrix(t *testing.T) {
 		},
 	}
 
-	for i:=0; i<6; i++{
+	for i := 0; i < 6; i++ {
 		sub := make(map[model.Node]int)
-		for j := 0; j<5; j++{
-			sub[model.Node{ID: uint64(j+1)}] = matrixOriented[i][j]
+		for j := 0; j < 5; j++ {
+			sub[model.Node{ID: uint64(j + 1)}] = matrixOriented[i][j]
 		}
 		answerOriented[model.Edge{Name: edgeList[i].Name, From: edgeList[i].From, To: edgeList[i].To, IsDirected: true}] = sub
 	}
 
-	for i:=0; i<6; i++{
+	for i := 0; i < 6; i++ {
 		sub := make(map[model.Node]int)
-		for j := 0; j<5; j++{
-			sub[model.Node{ID: uint64(j+1)}] = matrixUnOriented[i][j]
+		for j := 0; j < 5; j++ {
+			sub[model.Node{ID: uint64(j + 1)}] = matrixUnOriented[i][j]
 		}
 		answerUnOriented[edgeList[i]] = sub
 	}
@@ -202,7 +211,7 @@ func TestGraph_IncidenceMatrix(t *testing.T) {
 								ID: 2,
 							},
 							IsDirected: true,
-							Name: "1",
+							Name:       "1",
 						},
 						{
 							From: model.Node{
@@ -212,7 +221,7 @@ func TestGraph_IncidenceMatrix(t *testing.T) {
 								ID: 3,
 							},
 							IsDirected: true,
-							Name: "2",
+							Name:       "2",
 						},
 						{
 							From: model.Node{
@@ -222,7 +231,7 @@ func TestGraph_IncidenceMatrix(t *testing.T) {
 								ID: 4,
 							},
 							IsDirected: true,
-							Name: "3",
+							Name:       "3",
 						},
 						{
 							From: model.Node{
@@ -232,7 +241,7 @@ func TestGraph_IncidenceMatrix(t *testing.T) {
 								ID: 1,
 							},
 							IsDirected: true,
-							Name: "4",
+							Name:       "4",
 						},
 						{
 							From: model.Node{
@@ -242,7 +251,7 @@ func TestGraph_IncidenceMatrix(t *testing.T) {
 								ID: 5,
 							},
 							IsDirected: true,
-							Name: "5",
+							Name:       "5",
 						},
 						{
 							From: model.Node{
@@ -252,7 +261,7 @@ func TestGraph_IncidenceMatrix(t *testing.T) {
 								ID: 3,
 							},
 							IsDirected: true,
-							Name: "6",
+							Name:       "6",
 						},
 					},
 				},
@@ -324,7 +333,7 @@ func TestGraph_IncidenceMatrix(t *testing.T) {
 		},
 	}
 
-	for _, test := range tests{
+	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
 			g := Graph{}
 			got := g.IncidenceMatrix(test.args.graph)
@@ -335,7 +344,7 @@ func TestGraph_IncidenceMatrix(t *testing.T) {
 }
 
 func TestGraph_AdjacencyMatrix(t *testing.T) {
-	type args struct{
+	type args struct {
 		graph model.Graph
 	}
 	answerOriented := make(map[model.Node]map[model.Node]int)
@@ -357,22 +366,22 @@ func TestGraph_AdjacencyMatrix(t *testing.T) {
 		{0, 0, 1, 1, 0},
 	}
 
-	for i:=0; i<5; i++{
+	for i := 0; i < 5; i++ {
 		sub := make(map[model.Node]int)
-		for j := 0; j<5; j++{
+		for j := 0; j < 5; j++ {
 			sub[model.Node{ID: uint64(j + 1)}] = matrixOriented[i][j]
 
 		}
-		answerOriented[model.Node{ID: uint64(i+1)}] = sub
+		answerOriented[model.Node{ID: uint64(i + 1)}] = sub
 	}
 
-	for i:=0; i<5; i++{
+	for i := 0; i < 5; i++ {
 		sub := make(map[model.Node]int)
-		for j := 0; j<5; j++{
+		for j := 0; j < 5; j++ {
 			sub[model.Node{ID: uint64(j + 1)}] = matrixUnOriented[i][j]
 
 		}
-		answerUnOriented[model.Node{ID: uint64(i+1)}] = sub
+		answerUnOriented[model.Node{ID: uint64(i + 1)}] = sub
 	}
 
 	tests := []struct {
@@ -450,7 +459,6 @@ func TestGraph_AdjacencyMatrix(t *testing.T) {
 						{
 							From: model.Node{
 								ID: 1,
-
 							},
 							To: model.Node{
 								ID: 2,
@@ -502,7 +510,7 @@ func TestGraph_AdjacencyMatrix(t *testing.T) {
 			want: answerUnOriented,
 		},
 	}
-	for _, test := range tests{
+	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
 			g := Graph{}
 			got := g.AdjacencyMatrix(test.args.graph)
@@ -683,33 +691,33 @@ func TestGraph_AllShortestPaths(t *testing.T) {
 			},
 			want: [][]model.Node{
 
+				{
 					{
-						{
-							Name:  "First",
-							Color: "BLue",
-							ID:    1,
-						},
-						{
-							ID: 5,
-						},
-						{
-							ID: 4,
-						},
+						Name:  "First",
+						Color: "BLue",
+						ID:    1,
 					},
 					{
-						{
-							Name:  "First",
-							Color: "BLue",
-							ID:    1,
-						},
-						{
-							ID: 3,
-						},
-						{
-							ID: 4,
-						},
+						ID: 5,
+					},
+					{
+						ID: 4,
 					},
 				},
+				{
+					{
+						Name:  "First",
+						Color: "BLue",
+						ID:    1,
+					},
+					{
+						ID: 3,
+					},
+					{
+						ID: 4,
+					},
+				},
+			},
 		},
 		{
 			args: args{
@@ -791,20 +799,19 @@ func TestGraph_AllShortestPaths(t *testing.T) {
 			},
 			want: [][]model.Node{
 
+				{
 					{
-						{
-							ID: 4,
-						},
-						{
-							ID: 5,
-						},
-						{
-							ID:    1,
-							Name:  "First",
-							Color: "BLue",
-						},
+						ID: 4,
 					},
-
+					{
+						ID: 5,
+					},
+					{
+						ID:    1,
+						Name:  "First",
+						Color: "BLue",
+					},
+				},
 			},
 		},
 	}
@@ -814,13 +821,593 @@ func TestGraph_AllShortestPaths(t *testing.T) {
 			g := Graph{}
 			got := g.AllShortestPaths(tt.args.graph, tt.args.fromNode, tt.args.toNode)
 			for _, wantOption := range tt.want {
-				for _, got := range got{
-					if SlicesEqual(wantOption, got){
+				for _, got := range got {
+					if SlicesEqual(wantOption, got) {
 						equalWaysFound = true
 						break
 					}
 				}
 				if equalWaysFound == false {
+					assert.False(t, false)
+				}
+			}
+			assert.True(t, true)
+		})
+	}
+}
+
+func TestGraph_FindDiameter(t *testing.T) {
+	type args struct {
+		graph    model.Graph
+		fromNode uint64
+		toNode   uint64
+	}
+	tests := []struct {
+		name string
+		args args
+		want uint64
+	}{
+		{
+			args: args{
+				graph: model.Graph{
+					Edges: []model.Edge{
+						{
+							From: model.Node{
+								ID: 2,
+							},
+							To: model.Node{
+								ID:    1,
+								Name:  "First",
+								Color: "BLue",
+							},
+						},
+						{
+							From: model.Node{
+								ID: 3,
+							},
+							To: model.Node{
+								ID: 2,
+							},
+						},
+						{
+							From: model.Node{
+								ID:    1,
+								Name:  "First",
+								Color: "BLue",
+							},
+							To: model.Node{
+								ID: 3,
+							},
+						},
+						{
+							From: model.Node{
+								ID: 3,
+							},
+							To: model.Node{
+								ID: 5,
+							},
+						},
+						{
+							From: model.Node{
+								ID: 4,
+							},
+							To: model.Node{
+								ID: 3,
+							},
+						},
+						{
+							From: model.Node{
+								ID: 5,
+							},
+							To: model.Node{
+								ID:    1,
+								Name:  "First",
+								Color: "BLue",
+							},
+						},
+						{
+							From: model.Node{
+								ID: 4,
+							},
+							To: model.Node{
+								ID: 5,
+							},
+						},
+					},
+				},
+			},
+			want: 2,
+		},
+		{
+			args: args{
+				graph: model.Graph{
+					Edges: []model.Edge{
+						{
+							From: model.Node{
+								ID: 2,
+							},
+							To: model.Node{
+								Name:  "First",
+								Color: "BLue",
+								ID:    1,
+							},
+							IsDirected: true,
+						},
+						{
+							From: model.Node{
+								ID: 3,
+							},
+							To: model.Node{
+								ID: 2,
+							},
+							IsDirected: true,
+						},
+						{
+							From: model.Node{
+								Name:  "First",
+								Color: "BLue",
+								ID:    1,
+							},
+							To: model.Node{
+								ID: 3,
+							},
+							IsDirected: true,
+						},
+						{
+							From: model.Node{
+								ID: 3,
+							},
+							To: model.Node{
+								ID: 5,
+							},
+							IsDirected: true,
+						},
+						{
+							From: model.Node{
+								ID: 4,
+							},
+							To: model.Node{
+								ID: 3,
+							},
+							IsDirected: true,
+						},
+						{
+							From: model.Node{
+								ID: 5,
+							},
+							To: model.Node{
+								ID:    1,
+								Name:  "First",
+								Color: "BLue",
+							},
+							IsDirected: true,
+						},
+						{
+							From: model.Node{
+								ID: 4,
+							},
+							To: model.Node{
+								ID: 5,
+							},
+							IsDirected: true,
+						},
+					},
+				},
+			},
+			want: 0,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			g := Graph{}
+			got := g.FindDiameter(tt.args.graph)
+			assert.Equal(t, tt.want, got)
+		})
+	}
+}
+
+func TestGraph_FindRadius(t *testing.T) {
+	type args struct {
+		graph    model.Graph
+		fromNode uint64
+		toNode   uint64
+	}
+	tests := []struct {
+		name string
+		args args
+		want uint64
+	}{
+		{
+			args: args{
+				graph: model.Graph{
+					Edges: []model.Edge{
+						{
+							From: model.Node{
+								ID: 2,
+							},
+							To: model.Node{
+								ID:    1,
+								Name:  "First",
+								Color: "BLue",
+							},
+						},
+						{
+							From: model.Node{
+								ID: 3,
+							},
+							To: model.Node{
+								ID: 2,
+							},
+						},
+						{
+							From: model.Node{
+								ID:    1,
+								Name:  "First",
+								Color: "BLue",
+							},
+							To: model.Node{
+								ID: 3,
+							},
+						},
+						{
+							From: model.Node{
+								ID: 3,
+							},
+							To: model.Node{
+								ID: 5,
+							},
+						},
+						{
+							From: model.Node{
+								ID: 4,
+							},
+							To: model.Node{
+								ID: 3,
+							},
+						},
+						{
+							From: model.Node{
+								ID: 4,
+							},
+							To: model.Node{
+								ID: 5,
+							},
+						},
+					},
+				},
+			},
+			want: 1,
+		},
+		{
+			args: args{
+				graph: model.Graph{
+					Edges: []model.Edge{
+						{
+							From: model.Node{
+								ID: 2,
+							},
+							To: model.Node{
+								Name:  "First",
+								Color: "BLue",
+								ID:    1,
+							},
+							IsDirected: true,
+						},
+						{
+							From: model.Node{
+								ID: 3,
+							},
+							To: model.Node{
+								ID: 2,
+							},
+							IsDirected: true,
+						},
+						{
+							From: model.Node{
+								Name:  "First",
+								Color: "BLue",
+								ID:    1,
+							},
+							To: model.Node{
+								ID: 3,
+							},
+							IsDirected: true,
+						},
+						{
+							From: model.Node{
+								ID: 3,
+							},
+							To: model.Node{
+								ID: 5,
+							},
+							IsDirected: true,
+						},
+						{
+							From: model.Node{
+								ID: 4,
+							},
+							To: model.Node{
+								ID: 3,
+							},
+							IsDirected: true,
+						},
+						{
+							From: model.Node{
+								ID: 5,
+							},
+							To: model.Node{
+								ID:    1,
+								Name:  "First",
+								Color: "BLue",
+							},
+							IsDirected: true,
+						},
+						{
+							From: model.Node{
+								ID: 4,
+							},
+							To: model.Node{
+								ID: 5,
+							},
+							IsDirected: true,
+						},
+					},
+				},
+			},
+			want: 0,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			g := Graph{}
+			got := g.FindRadius(tt.args.graph)
+			assert.Equal(t, tt.want, got)
+		})
+	}
+}
+
+func TestGraph_FindCenter(t *testing.T) {
+	type args struct {
+		graph    model.Graph
+		fromNode uint64
+		toNode   uint64
+	}
+	tests := []struct {
+		name string
+		args args
+		want []model.Node
+	}{
+		{
+			args: args{
+				graph: model.Graph{
+					Edges: []model.Edge{
+						{
+							From: model.Node{
+								ID: 2,
+							},
+							To: model.Node{
+								ID:    1,
+								Name:  "First",
+								Color: "BLue",
+							},
+						},
+						{
+							From: model.Node{
+								ID: 3,
+							},
+							To: model.Node{
+								ID: 2,
+							},
+						},
+						{
+							From: model.Node{
+								ID:    1,
+								Name:  "First",
+								Color: "BLue",
+							},
+							To: model.Node{
+								ID: 3,
+							},
+						},
+						{
+							From: model.Node{
+								ID: 3,
+							},
+							To: model.Node{
+								ID: 5,
+							},
+						},
+						{
+							From: model.Node{
+								ID: 4,
+							},
+							To: model.Node{
+								ID: 3,
+							},
+						},
+						{
+							From: model.Node{
+								ID: 4,
+							},
+							To: model.Node{
+								ID: 5,
+							},
+						},
+					},
+				},
+			},
+			want: []model.Node{
+				{
+					ID: 3,
+				},
+			},
+		},
+		{
+			args: args{
+				graph: model.Graph{
+					Edges: []model.Edge{
+						{
+							From: model.Node{
+								ID: 2,
+							},
+							To: model.Node{
+								Name:  "First",
+								Color: "BLue",
+								ID:    1,
+							},
+							IsDirected: true,
+						},
+						{
+							From: model.Node{
+								ID: 3,
+							},
+							To: model.Node{
+								ID: 2,
+							},
+							IsDirected: true,
+						},
+						{
+							From: model.Node{
+								Name:  "First",
+								Color: "BLue",
+								ID:    1,
+							},
+							To: model.Node{
+								ID: 3,
+							},
+							IsDirected: true,
+						},
+						{
+							From: model.Node{
+								ID: 3,
+							},
+							To: model.Node{
+								ID: 5,
+							},
+							IsDirected: true,
+						},
+						{
+							From: model.Node{
+								ID: 4,
+							},
+							To: model.Node{
+								ID: 3,
+							},
+							IsDirected: true,
+						},
+						{
+							From: model.Node{
+								ID: 5,
+							},
+							To: model.Node{
+								ID:    1,
+								Name:  "First",
+								Color: "BLue",
+							},
+							IsDirected: true,
+						},
+						{
+							From: model.Node{
+								ID: 4,
+							},
+							To: model.Node{
+								ID: 5,
+							},
+							IsDirected: true,
+						},
+					},
+				},
+			},
+			want: nil,
+		},
+		{
+			args: args{
+				graph: model.Graph{
+					Edges: []model.Edge{
+						{
+							From: model.Node{
+								ID: 2,
+							},
+							To: model.Node{
+								Name:  "First",
+								Color: "BLue",
+								ID:    1,
+							},
+						},
+						{
+							From: model.Node{
+								ID: 3,
+							},
+							To: model.Node{
+								ID: 2,
+							},
+						},
+						{
+							From: model.Node{
+								ID: 3,
+							},
+							To: model.Node{
+								ID: 5,
+							},
+						},
+						{
+							From: model.Node{
+								ID: 4,
+							},
+							To: model.Node{
+								ID: 3,
+							},
+						},
+						{
+							From: model.Node{
+								ID: 5,
+							},
+							To: model.Node{
+								ID:    1,
+								Name:  "First",
+								Color: "BLue",
+							},
+						},
+						{
+							From: model.Node{
+								ID: 4,
+							},
+							To: model.Node{
+								ID: 5,
+							},
+						},
+					},
+				},
+			},
+			want: []model.Node{
+				{
+					ID: 1,
+				},
+				{
+					ID: 2,
+				},
+				{
+					ID: 3,
+				},
+				{
+					ID: 4,
+				},
+				{
+					ID: 5,
+				},
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			g := Graph{}
+			got := g.FindCenter(tt.args.graph)
+			if len(got) != len(tt.want) {
+				assert.False(t, false)
+			}
+			for _, currentCenter := range tt.want {
+
+				if nodeInSlice(currentCenter, got) == false {
 					assert.False(t, false)
 				}
 			}

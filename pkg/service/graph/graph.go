@@ -15,6 +15,10 @@ type (
 type Methods interface {
 	IncidenceMatrix(graph model.Graph) IncidenceMatrix
 	PlanarCheck(graph model.Graph) bool
+	findEccentricity(graph model.Graph, node model.Node, nodes map[model.Node]struct{}) uint64
+	FindDiameter(graph model.Graph) uint64
+	FindRadius(graph model.Graph) uint64
+	FindCenter(graph model.Graph) []model.Node
 	AdjacencyMatrix(graph model.Graph) AdjacencyMatrix
 	ShortestPath(graph model.Graph, fromNode, toNode uint64) []model.Node
 	AllShortestPaths(graph model.Graph, fromNode, toNode uint64) [][]model.Node
@@ -27,7 +31,7 @@ type Graph struct {
 }
 
 func (g Graph) PlanarCheck(graph model.Graph) bool {
-	if len(graph.Edges) <= (3 * len(setNodes(graph)) - 6){
+	if len(graph.Edges) <= (3*len(setNodes(graph)) - 6) {
 		return true
 	}
 	return false
@@ -49,7 +53,7 @@ func (g Graph) IncidenceMatrix(graph model.Graph) IncidenceMatrix {
 						mNodes[n] = -1
 					}
 				}
-			} else{
+			} else {
 				mNodes[n] = 0
 				if e.From == n {
 					mNodes[n] = 1
@@ -71,7 +75,7 @@ func (g Graph) AdjacencyMatrix(graph model.Graph) AdjacencyMatrix {
 		nodes[e.To] = []model.Node{}
 	}
 	for _, e := range graph.Edges {
-		if e.IsDirected{
+		if e.IsDirected {
 			nodes[e.From] = append(nodes[e.From], e.To)
 		} else {
 			nodes[e.From] = append(nodes[e.From], e.To)
@@ -99,23 +103,111 @@ func (g Graph) ShortestPath(graph model.Graph, fromNode, toNode uint64) []model.
 	matrix := g.AdjacencyMatrix(graph)
 	nodes := setNodes(graph)
 	var currentNode model.Node
-	for node := range nodes{
-		if node.ID == fromNode{
+	for node := range nodes {
+		if node.ID == fromNode {
 			currentNode = node
 			break
 		}
 	}
 
 	shortestPaths := paths.AllShortestPathsFind(nodes, matrix, currentNode, toNode)
+	if shortestPaths == nil {
+		return nil
+	}
 	return shortestPaths[0]
+}
+
+// Returns eccentricity of node or
+// 0 if graph is disconnected
+func (g Graph) findEccentricity(graph model.Graph, node model.Node, nodes map[model.Node]struct{}) uint64 {
+	var maxCost uint64 = 0
+	for toNode := range nodes {
+		if node != toNode {
+			path := g.ShortestPath(graph, node.ID, toNode.ID)
+
+			if path == nil {
+				return 0
+			}
+			cost := uint64(len(path) - 1)
+
+			if cost > maxCost {
+				maxCost = cost
+			}
+		}
+	}
+	return maxCost
+}
+
+// Returns diameter of the graph or
+// 0 if graph is disconnected
+func (g Graph) FindDiameter(graph model.Graph) uint64 {
+	nodes := setNodes(graph)
+	var maxCost uint64 = 0
+
+	for fromNode := range nodes {
+		eccentricity := g.findEccentricity(graph, fromNode, nodes)
+		if eccentricity == 0 {
+			return 0
+		}
+		if eccentricity > maxCost {
+			maxCost = eccentricity
+		}
+	}
+	return maxCost
+}
+
+// Returns radius of the graph or
+// 0 if graph is disconnected
+func (g Graph) FindRadius(graph model.Graph) uint64 {
+	nodes := setNodes(graph)
+	minCost := uint64(len(nodes) + 2)
+
+	for fromNode := range nodes {
+		eccentricity := g.findEccentricity(graph, fromNode, nodes)
+		if eccentricity == 0 {
+			return 0
+		}
+
+		if eccentricity < minCost {
+			minCost = eccentricity
+		}
+	}
+	return minCost
+}
+
+// Returns center of the graph or
+// nil if graph is disconnected
+func (g Graph) FindCenter(graph model.Graph) []model.Node {
+	nodes := setNodes(graph)
+	minCost := uint64(len(nodes) + 2)
+	var centerNodes []model.Node
+	eccentricities := make(map[model.Node]uint64)
+
+	for fromNode := range nodes {
+		eccentricities[fromNode] = g.findEccentricity(graph, fromNode, nodes)
+		if eccentricities[fromNode] == 0 {
+			return nil
+		}
+		if eccentricities[fromNode] <= minCost {
+			minCost = eccentricities[fromNode]
+		}
+	}
+
+	for currentNode := range eccentricities {
+		if eccentricities[currentNode] == minCost {
+			centerNodes = append(centerNodes, currentNode)
+		}
+	}
+
+	return centerNodes
 }
 
 func (g Graph) AllShortestPaths(graph model.Graph, fromNode, toNode uint64) [][]model.Node {
 	matrix := g.AdjacencyMatrix(graph)
 	nodes := setNodes(graph)
 	var currentNode model.Node
-	for node := range nodes{
-		if node.ID == fromNode{
+	for node := range nodes {
+		if node.ID == fromNode {
 			currentNode = node
 			break
 		}
