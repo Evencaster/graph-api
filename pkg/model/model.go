@@ -1,7 +1,7 @@
 package model
 
 type Graph struct {
-	ID    uint64
+	ID    uint64 `json:"id"`
 	Name  string `json:"name"`
 	Edges []Edge `json:"arcs"`
 	Nodes []Node `json:"vertexes"`
