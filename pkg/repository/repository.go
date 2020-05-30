@@ -29,6 +29,7 @@ func New() *DB {
 type Repository interface {
 	CreateGraph(graph model.Graph) (uint64, error)
 	Graph(id uint64) (model.Graph, error)
+	List() ([]model.Graph, error)
 	UpdateGraph(graph model.Graph) error
 	DeleteGraph(id uint64) error
 }
@@ -52,6 +53,19 @@ func (d *DB) Graph(id uint64) (model.Graph, error) {
 		return model.Graph{}, errors.New("can't cast")
 	}
 	return g, nil
+}
+
+func (d *DB) List() ([]model.Graph, error) {
+	var list []model.Graph
+	d.data.Range(func(key, value interface{}) bool {
+		g, ok := value.(model.Graph)
+		if !ok {
+			return false
+		}
+		list = append(list, g)
+		return true
+	})
+	return list, nil
 }
 
 func (d *DB) UpdateGraph(graph model.Graph) error {

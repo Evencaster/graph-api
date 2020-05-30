@@ -29,7 +29,7 @@ func NewGraph(repo repository.Repository) *Graph {
 	}
 }
 
-func (g *Graph) PlanarCheck(id uint64) (bool, error){
+func (g *Graph) PlanarCheck(id uint64) (bool, error) {
 	foundGraph, err := g.Graph(id)
 	if err != nil {
 		return false, err
@@ -89,6 +89,10 @@ func (g *Graph) path(graphID, startedNode uint64, f findPathF) ([]model.Node, er
 		return nil, repository.ErrNotFound
 	}
 	return path, nil
+}
+
+func (g *Graph) List() ([]model.Graph, error) {
+	return g.repository.List()
 }
 
 func (g *Graph) CreateGraph(graph model.Graph) (uint64, error) {
