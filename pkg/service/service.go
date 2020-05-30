@@ -11,6 +11,9 @@ type Service interface {
 	IncidenceMatrix(id uint64) (graph.IncidenceMatrix, error)
 	AdjacencyMatrix(id uint64) (graph.AdjacencyMatrix, error)
 	PlanarCheck(id uint64) (bool, error)
+	FindDiameter(id uint64) (uint64, error)
+	FindRadius(id uint64) (uint64, error)
+	FindCenter(id uint64) ([]model.Node, error)
 	ShortestPath(graphID, fromNode, toNode uint64) ([]model.Node, error)
 	AllShortestPaths(graphID, fromNode, toNode uint64) ([][]model.Node, error)
 	HamiltonianPath(graphID, startedNode uint64) ([]model.Node, error)
@@ -35,6 +38,30 @@ func (g *Graph) PlanarCheck(id uint64) (bool, error) {
 		return false, err
 	}
 	return g.graph.PlanarCheck(foundGraph), nil
+}
+
+func (g *Graph) FindDiameter(id uint64) (uint64, error) {
+	foundGraph, err := g.Graph(id)
+	if err != nil {
+		return 0, err
+	}
+	return g.graph.FindDiameter(foundGraph), nil
+}
+
+func (g *Graph) FindCenter(id uint64) ([]model.Node, error) {
+	foundGraph, err := g.Graph(id)
+	if err != nil {
+		return nil, err
+	}
+	return g.graph.FindCenter(foundGraph), nil
+}
+
+func (g *Graph) FindRadius(id uint64) (uint64, error) {
+	foundGraph, err := g.Graph(id)
+	if err != nil {
+		return 0, err
+	}
+	return g.graph.FindRadius(foundGraph), nil
 }
 
 func (g *Graph) IncidenceMatrix(id uint64) (graph.IncidenceMatrix, error) {

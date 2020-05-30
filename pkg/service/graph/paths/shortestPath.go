@@ -4,12 +4,10 @@ import (
 	"github.com/illfate2/graph-api/pkg/model"
 )
 
-
-
 var allPaths [][]model.Node
 var shortestCost uint64
 
-func rec(nodes map[model.Node]struct{}, matrix map[model.Node]map[model.Node]int, currentNode model.Node, toNode, cost uint64, visitedEdges map[model.Node]uint64, path []model.Node){
+func rec(nodes map[model.Node]struct{}, matrix map[model.Node]map[model.Node]int, currentNode model.Node, toNode, cost uint64, visitedEdges map[model.Node]uint64, path []model.Node) {
 
 	if currentNode.ID == toNode {
 
@@ -25,11 +23,11 @@ func rec(nodes map[model.Node]struct{}, matrix map[model.Node]map[model.Node]int
 
 	for nextNode := range nodes {
 
-		if matrix[currentNode][nextNode] == 0{
+		if matrix[currentNode][nextNode] == 0 {
 			continue
 		}
 
-		if visitedEdges[nextNode] >= cost || visitedEdges[nextNode] == 0{
+		if visitedEdges[nextNode] >= cost || visitedEdges[nextNode] == 0 {
 
 			visitedEdges[nextNode] = cost
 			path := append(path, nextNode)
@@ -39,28 +37,28 @@ func rec(nodes map[model.Node]struct{}, matrix map[model.Node]map[model.Node]int
 	}
 }
 
-func AllShortestPathsFind(nodes map[model.Node]struct{}, matrix map[model.Node]map[model.Node]int, currentNode model.Node, toNode uint64) [][]model.Node{
+func AllShortestPathsFind(nodes map[model.Node]struct{}, matrix map[model.Node]map[model.Node]int, currentNode model.Node, toNode uint64) [][]model.Node {
 
 	allPaths = nil
-	visitedEdges:=make(map[model.Node]uint64)
+	visitedEdges := make(map[model.Node]uint64)
 
 	cost := uint64(0)
-	shortestCost = uint64(len(nodes)+2)
+	shortestCost = uint64(len(nodes) + 2)
 
 	var path []model.Node
 	var shortestPaths [][]model.Node
 
 	path = append(path, currentNode)
-	visitedEdges[currentNode] = uint64(len(nodes))+2
+	visitedEdges[currentNode] = uint64(len(nodes)) + 2
 
 	rec(nodes, matrix, currentNode, toNode, cost, visitedEdges, path)
 
-	if len(allPaths) == 0{
+	if allPaths == nil {
 		return nil
 	}
 
-	for _, path := range allPaths{
-		if len(path) == len(allPaths[len(allPaths) - 1]){
+	for _, path := range allPaths {
+		if len(path) == len(allPaths[len(allPaths)-1]) {
 			shortestPaths = append(shortestPaths, path)
 		}
 	}
