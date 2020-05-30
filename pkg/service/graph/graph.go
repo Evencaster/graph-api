@@ -1,8 +1,13 @@
 package graph
 
 import (
-	"github.com/illfate2/graph-api/pkg/service/graph/paths"
+	"sort"
+	"strconv"
+	"strings"
+
 	"gonum.org/v1/gonum/graph/simple"
+
+	"github.com/illfate2/graph-api/pkg/service/graph/paths"
 
 	"github.com/illfate2/graph-api/pkg/model"
 )
@@ -27,7 +32,7 @@ type Graph struct {
 }
 
 func (g Graph) PlanarCheck(graph model.Graph) bool {
-	if len(graph.Edges) <= (3 * len(setNodes(graph)) - 6){
+	if len(graph.Edges) <= (3*len(setNodes(graph)) - 6) {
 		return true
 	}
 	return false
@@ -49,7 +54,7 @@ func (g Graph) IncidenceMatrix(graph model.Graph) IncidenceMatrix {
 						mNodes[n] = -1
 					}
 				}
-			} else{
+			} else {
 				mNodes[n] = 0
 				if e.From == n {
 					mNodes[n] = 1
@@ -71,7 +76,7 @@ func (g Graph) AdjacencyMatrix(graph model.Graph) AdjacencyMatrix {
 		nodes[e.To] = []model.Node{}
 	}
 	for _, e := range graph.Edges {
-		if e.IsDirected{
+		if e.IsDirected {
 			nodes[e.From] = append(nodes[e.From], e.To)
 		} else {
 			nodes[e.From] = append(nodes[e.From], e.To)
@@ -99,8 +104,8 @@ func (g Graph) ShortestPath(graph model.Graph, fromNode, toNode uint64) []model.
 	matrix := g.AdjacencyMatrix(graph)
 	nodes := setNodes(graph)
 	var currentNode model.Node
-	for node := range nodes{
-		if node.ID == fromNode{
+	for node := range nodes {
+		if node.ID == fromNode {
 			currentNode = node
 			break
 		}
@@ -114,8 +119,8 @@ func (g Graph) AllShortestPaths(graph model.Graph, fromNode, toNode uint64) [][]
 	matrix := g.AdjacencyMatrix(graph)
 	nodes := setNodes(graph)
 	var currentNode model.Node
-	for node := range nodes{
-		if node.ID == fromNode{
+	for node := range nodes {
+		if node.ID == fromNode {
 			currentNode = node
 			break
 		}
@@ -252,6 +257,35 @@ func toUndirectedGraph(g model.Graph) *simple.UndirectedGraph {
 	return undirGraph
 }
 
+func (m AdjacencyMatrix) String() string {
+	var strBuilder strings.Builder
+	nodes := m.getSortedSlice()
+	strBuilder.WriteString("   ")
+
+	for _, n := range nodes {
+		id := strconv.FormatUint(n.ID, 10)
+		strBuilder.WriteString(id)
+		strBuilder.WriteString(" ")
+	}
+	strBuilder.WriteString("\n")
+	for _, n := range nodes {
+		nodesToIndex := m[n]
+		strBuilder.WriteString(strconv.FormatUint(n.ID, 10))
+		strBuilder.WriteString(": ")
+
+		for _, n := range nodes {
+			idx := nodesToIndex[n]
+			id := strconv.FormatInt(int64(idx), 10)
+			strBuilder.WriteString(id)
+			strBuilder.WriteString(" ")
+		}
+		strBuilder.WriteString("\n")
+	}
+
+	return strBuilder.String()
+
+}
+
 func setNodes(graph model.Graph) map[model.Node]struct{} {
 	nodes := make(map[model.Node]struct{})
 	for _, e := range graph.Edges {
@@ -267,5 +301,18 @@ func graphToNodes(graph model.Graph) map[uint64]model.Node {
 		nodes[e.From.ID] = e.From
 		nodes[e.To.ID] = e.To
 	}
+	return nodes
+}
+
+func (m AdjacencyMatrix) getSortedSlice() []model.Node {
+	nodes := make([]model.Node, 0, len(m))
+	for k := range m {
+		nodes = append(nodes, k)
+	}
+
+	sort.Slice(nodes, func(i, j int) bool {
+		return nodes[i].ID < nodes[j].ID
+	})
+
 	return nodes
 }
