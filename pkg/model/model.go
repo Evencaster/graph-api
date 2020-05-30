@@ -13,7 +13,6 @@ type Node struct {
 	ID    uint64    `json:"id"`
 	X 	  uint64 	`json:"x"`
 	Y 	  uint64   	`json:"y"`
-	Edges []uint64 	`json:"arcs"`
 	Name  string    `json:"name"`
 	Shape NodeShape `json:"shape"`
 	Color string    `json:"color"`

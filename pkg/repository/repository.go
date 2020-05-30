@@ -21,7 +21,6 @@ type DB struct {
 func New() *DB {
 	return &DB{
 		data: sync.Map{},
-		//uuid: uuid.New(),
 		mx:   sync.Mutex{},
 	}
 }
