@@ -157,9 +157,9 @@ func (s *Server) AdjacencyMatrix(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 	resp := struct {
-		Matrix graph.AdjacencyMatrix `json:"matrix"`
+		Matrix string `json:"matrix"`
 	}{
-		Matrix: m,
+		Matrix: m.String(),
 	}
 	_ = json.NewEncoder(w).Encode(resp)
 }

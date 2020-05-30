@@ -1,8 +1,13 @@
 package graph
 
 import (
-	"github.com/illfate2/graph-api/pkg/service/graph/paths"
+	"sort"
+	"strconv"
+	"strings"
+
 	"gonum.org/v1/gonum/graph/simple"
+
+	"github.com/illfate2/graph-api/pkg/service/graph/paths"
 
 	"github.com/illfate2/graph-api/pkg/model"
 )
@@ -344,6 +349,35 @@ func toUndirectedGraph(g model.Graph) *simple.UndirectedGraph {
 	return undirGraph
 }
 
+func (m AdjacencyMatrix) String() string {
+	var strBuilder strings.Builder
+	nodes := m.getSortedSlice()
+	strBuilder.WriteString("   ")
+
+	for _, n := range nodes {
+		id := strconv.FormatUint(n.ID, 10)
+		strBuilder.WriteString(id)
+		strBuilder.WriteString(" ")
+	}
+	strBuilder.WriteString("\n")
+	for _, n := range nodes {
+		nodesToIndex := m[n]
+		strBuilder.WriteString(strconv.FormatUint(n.ID, 10))
+		strBuilder.WriteString(": ")
+
+		for _, n := range nodes {
+			idx := nodesToIndex[n]
+			id := strconv.FormatInt(int64(idx), 10)
+			strBuilder.WriteString(id)
+			strBuilder.WriteString(" ")
+		}
+		strBuilder.WriteString("\n")
+	}
+
+	return strBuilder.String()
+
+}
+
 func setNodes(graph model.Graph) map[model.Node]struct{} {
 	nodes := make(map[model.Node]struct{})
 	for _, e := range graph.Edges {
@@ -359,5 +393,18 @@ func graphToNodes(graph model.Graph) map[uint64]model.Node {
 		nodes[e.From.ID] = e.From
 		nodes[e.To.ID] = e.To
 	}
+	return nodes
+}
+
+func (m AdjacencyMatrix) getSortedSlice() []model.Node {
+	nodes := make([]model.Node, 0, len(m))
+	for k := range m {
+		nodes = append(nodes, k)
+	}
+
+	sort.Slice(nodes, func(i, j int) bool {
+		return nodes[i].ID < nodes[j].ID
+	})
+
 	return nodes
 }
