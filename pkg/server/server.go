@@ -43,6 +43,7 @@ func New(service service.Service) *Server {
 		Queries("startNode", "{startNode}").Methods(http.MethodGet)
 
 	r.HandleFunc("/api/v1/graph/{id:[1-9]+[0-9]*}/planarCheck", s.PlanarCheck).Methods(http.MethodGet)
+	r.HandleFunc("/api/v1/graph/list", s.GraphList).Methods(http.MethodGet)
 	return &s
 }
 
@@ -78,6 +79,15 @@ func (s *Server) Graph(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 	_ = json.NewEncoder(w).Encode(g)
+}
+
+func (s *Server) GraphList(w http.ResponseWriter, req *http.Request) {
+	list, err := s.service.List()
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	_ = json.NewEncoder(w).Encode(list)
 }
 
 func (s *Server) UpdateGraph(w http.ResponseWriter, req *http.Request) {
