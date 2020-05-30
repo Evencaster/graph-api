@@ -333,8 +333,27 @@ func (g Graph) hamiltonianPath(
 	return nil, false
 }
 
-func (g Graph) Cartesian(first, second model.Graph) model.Graph {
-	return model.Graph{}
+func (g Graph) Cartesian(firstGraph, secondGraph model.Graph) model.Graph {
+	firstGraphNodes := setNodes(firstGraph)
+	secondGraphNodes := setNodes(secondGraph)
+
+	var cartesian model.Graph
+
+	for _, edge := range firstGraph.Edges {
+		cartesian.Edges = append(cartesian.Edges, edge)
+	}
+
+	for _, edge := range secondGraph.Edges {
+		cartesian.Edges = append(cartesian.Edges, edge)
+	}
+
+	for firstGraphNode := range firstGraphNodes {
+		for secondGraphNode := range secondGraphNodes {
+			edge := model.Edge{From: firstGraphNode, To: secondGraphNode}
+			cartesian.Edges = append(cartesian.Edges, edge)
+		}
+	}
+	return cartesian
 }
 
 func toUndirectedGraph(g model.Graph) *simple.UndirectedGraph {
