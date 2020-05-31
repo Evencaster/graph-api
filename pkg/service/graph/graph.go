@@ -419,7 +419,7 @@ func (g Graph) Cartesian(firstGraph, secondGraph model.Graph) model.Graph {
 
 	for i, firstGraphNode := range firstGraphNodes {
 		for j, secondGraphNode := range secondGraphNodes {
-			fromNode := model.Node{ID: id}
+			fromNode := model.Node{ID: id, X: firstGraphNode.X, Y: secondGraphNode.Y}
 			id++
 
 			for _, edge := range firstGraph.Edges {
@@ -436,7 +436,7 @@ func (g Graph) Cartesian(firstGraph, secondGraph model.Graph) model.Graph {
 					if fromNode.ID > toNodeID {
 						continue
 					}
-					ToNode := model.Node{ID: toNodeID}
+					ToNode := model.Node{ID: toNodeID, X: toNode.X, Y: secondGraphNode.Y}
 					edge := model.Edge{From: fromNode, To: ToNode}
 					cartesian.Edges = append(cartesian.Edges, edge)
 				}
@@ -454,7 +454,7 @@ func (g Graph) Cartesian(firstGraph, secondGraph model.Graph) model.Graph {
 					if fromNode.ID > toNodeID {
 						continue
 					}
-					ToNode := model.Node{ID: toNodeID}
+					ToNode := model.Node{ID: toNodeID, X: toNode.X, Y: secondGraphNode.Y}
 					edge := model.Edge{From: fromNode, To: ToNode}
 					cartesian.Edges = append(cartesian.Edges, edge)
 				}
@@ -474,7 +474,7 @@ func (g Graph) Cartesian(firstGraph, secondGraph model.Graph) model.Graph {
 					if fromNode.ID > toNodeID {
 						continue
 					}
-					ToNode := model.Node{ID: toNodeID}
+					ToNode := model.Node{ID: toNodeID, X: firstGraphNode.X, Y: toNode.Y}
 					edge := model.Edge{From: fromNode, To: ToNode}
 					cartesian.Edges = append(cartesian.Edges, edge)
 				}
@@ -492,7 +492,7 @@ func (g Graph) Cartesian(firstGraph, secondGraph model.Graph) model.Graph {
 					if fromNode.ID > toNodeID {
 						continue
 					}
-					ToNode := model.Node{ID: toNodeID}
+					ToNode := model.Node{ID: toNodeID, X: firstGraphNode.X, Y: toNode.Y}
 					edge := model.Edge{From: fromNode, To: ToNode}
 					cartesian.Edges = append(cartesian.Edges, edge)
 				}
