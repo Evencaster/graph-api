@@ -1631,6 +1631,301 @@ func TestGraph_HamiltonianPath(t *testing.T) {
 //	}
 //}
 
+func TestGraph_PlanarReduction(t *testing.T) {
+	type args struct {
+		firstGraph model.Graph
+	}
+	tests := []struct {
+		name string
+		args args
+		want model.Graph
+	}{
+		{
+			args: args{
+				firstGraph: model.Graph{
+					Edges: []model.Edge{
+						{
+							From: model.Node{
+								ID: 2,
+							},
+							To: model.Node{
+								ID:    1,
+								Name:  "First",
+								Color: "BLue",
+							},
+						},
+						{
+							From: model.Node{
+								ID: 3,
+							},
+							To: model.Node{
+								ID: 2,
+							},
+						},
+					},
+				},
+			},
+			want: model.Graph{
+				Edges: []model.Edge{
+					{
+						From: model.Node{
+							ID: 2,
+						},
+						To: model.Node{
+							ID:    1,
+							Name:  "First",
+							Color: "BLue",
+						},
+					},
+					{
+						From: model.Node{
+							ID: 3,
+						},
+						To: model.Node{
+							ID: 2,
+						},
+					},
+				},
+			},
+		},
+		{
+			args: args{
+				firstGraph: model.Graph{
+					Edges: []model.Edge{
+						{
+							From: model.Node{
+								ID: 2,
+							},
+							To: model.Node{
+								ID:    1,
+								Name:  "First",
+								Color: "BLue",
+							},
+						},
+						{
+							From: model.Node{
+								ID:    1,
+								Name:  "First",
+								Color: "BLue",
+							},
+							To: model.Node{
+								ID: 4,
+							},
+						},
+						{
+							From: model.Node{
+								ID:    1,
+								Name:  "First",
+								Color: "BLue",
+							},
+							To: model.Node{
+								ID: 5,
+							},
+						},
+						{
+							From: model.Node{
+								ID:    1,
+								Name:  "First",
+								Color: "BLue",
+							},
+							To: model.Node{
+								ID: 6,
+							},
+						},
+						{
+							From: model.Node{
+								ID: 2,
+							},
+							To: model.Node{
+								ID: 4,
+							},
+						},
+						{
+							From: model.Node{
+								ID: 2,
+							},
+							To: model.Node{
+								ID: 5,
+							},
+						},
+						{
+							From: model.Node{
+								ID: 2,
+							},
+							To: model.Node{
+								ID: 6,
+							},
+						},
+						{
+							From: model.Node{
+								ID: 2,
+							},
+							To: model.Node{
+								ID: 3,
+							},
+						},
+						{
+							From: model.Node{
+								ID: 3,
+							},
+							To: model.Node{
+								ID: 6,
+							},
+						},
+						{
+							From: model.Node{
+								ID: 3,
+							},
+							To: model.Node{
+								ID: 5,
+							},
+						},
+						{
+							From: model.Node{
+								ID: 3,
+							},
+							To: model.Node{
+								ID: 4,
+							},
+						},
+						{
+							From: model.Node{
+								ID: 4,
+							},
+							To: model.Node{
+								ID: 5,
+							},
+						},
+						{
+							From: model.Node{
+								ID: 5,
+							},
+							To: model.Node{
+								ID: 6,
+							},
+						},
+					},
+				},
+			},
+			want: model.Graph{
+				Edges: []model.Edge{
+					{
+						From: model.Node{
+							ID: 2,
+						},
+						To: model.Node{
+							ID:    1,
+							Name:  "First",
+							Color: "BLue",
+						},
+					},
+					{
+						From: model.Node{
+							ID:    1,
+							Name:  "First",
+							Color: "BLue",
+						},
+						To: model.Node{
+							ID: 4,
+						},
+					},
+					{
+						From: model.Node{
+							ID:    1,
+							Name:  "First",
+							Color: "BLue",
+						},
+						To: model.Node{
+							ID: 5,
+						},
+					},
+					{
+						From: model.Node{
+							ID:    1,
+							Name:  "First",
+							Color: "BLue",
+						},
+						To: model.Node{
+							ID: 6,
+						},
+					},
+					{
+						From: model.Node{
+							ID: 2,
+						},
+						To: model.Node{
+							ID: 4,
+						},
+					},
+					{
+						From: model.Node{
+							ID: 2,
+						},
+						To: model.Node{
+							ID: 5,
+						},
+					},
+					{
+						From: model.Node{
+							ID: 2,
+						},
+						To: model.Node{
+							ID: 6,
+						},
+					},
+					{
+						From: model.Node{
+							ID: 2,
+						},
+						To: model.Node{
+							ID: 3,
+						},
+					},
+					{
+						From: model.Node{
+							ID: 3,
+						},
+						To: model.Node{
+							ID: 6,
+						},
+					},
+					{
+						From: model.Node{
+							ID: 3,
+						},
+						To: model.Node{
+							ID: 5,
+						},
+					},
+					{
+						From: model.Node{
+							ID: 3,
+						},
+						To: model.Node{
+							ID: 4,
+						},
+					},
+					{
+						From: model.Node{
+							ID: 4,
+						},
+						To: model.Node{
+							ID: 5,
+						},
+					},
+				},
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			g := Graph{}
+			got := g.PlanarReduction(tt.args.firstGraph)
+			assert.Equal(t, tt.want, got)
+		})
+	}
+}
+
 func TestGraph_IsTree(t *testing.T) {
 	type args struct {
 		graph model.Graph
@@ -1675,7 +1970,7 @@ func TestGraph_IsTree(t *testing.T) {
 							To: model.Node{
 								ID: 3,
 							},
-						},						{
+						}, {
 							From: model.Node{
 								ID: 3,
 							},
@@ -1715,7 +2010,7 @@ func TestGraph_IsTree(t *testing.T) {
 							To: model.Node{
 								ID: 3,
 							},
-						},						{
+						}, {
 							From: model.Node{
 								ID: 3,
 							},

@@ -20,6 +20,7 @@ type (
 type Methods interface {
 	IncidenceMatrix(graph model.Graph) IncidenceMatrix
 	PlanarCheck(graph model.Graph) bool
+	PlanarReduction(graph model.Graph) model.Graph
 	findEccentricity(graph model.Graph, node model.Node, nodes map[model.Node]struct{}) uint64
 	FindDiameter(graph model.Graph) uint64
 	FindRadius(graph model.Graph) uint64
@@ -41,6 +42,18 @@ func (g Graph) PlanarCheck(graph model.Graph) bool {
 		return true
 	}
 	return false
+}
+
+func (g Graph) PlanarReduction(graph model.Graph) model.Graph {
+	planarGraph := graph
+	if len(graph.Edges) <= (3*len(setNodes(graph)) - 6) {
+		return planarGraph
+	}
+	edgesDeleteAmount := len(graph.Edges) - (3*len(setNodes(graph)) - 6)
+
+	planarGraph.Edges = graph.Edges[:len(graph.Edges)-edgesDeleteAmount]
+
+	return planarGraph
 }
 
 func (g Graph) IncidenceMatrix(graph model.Graph) IncidenceMatrix {
