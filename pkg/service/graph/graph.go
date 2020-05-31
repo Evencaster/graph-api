@@ -359,8 +359,7 @@ func (g Graph) Cartesian(firstGraph, secondGraph model.Graph) model.Graph {
 
 func (g Graph) IsTree(graph model.Graph) bool {
 	visited := make(map[uint64]bool)
-
-	if isCycle(0, visited, -1, nodeToAllNodes(graph)) {
+	if isCycle(getSortedNodes(graph)[0].ID, visited, -1, nodeToAllNodes(graph)) {
 		return false
 	}
 
