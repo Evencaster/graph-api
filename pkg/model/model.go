@@ -1,10 +1,11 @@
 package model
 
 type Graph struct {
-	ID    uint64 `json:"id"`
-	Name  string `json:"name"`
-	Edges []Edge `json:"arcs"`
-	Nodes []Node `json:"vertexes"`
+	ID        uint64 `json:"id"`
+	Name      string `json:"name"`
+	Edges     []Edge `json:"arcs"`
+	Nodes 	  []Node `json:"vertexes"`
+	Timestamp uint64 `json:"timestamp"`
 }
 
 type NodeShape string
