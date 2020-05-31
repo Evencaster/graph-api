@@ -423,9 +423,45 @@ func toUndirectedGraph(g model.Graph) *simple.UndirectedGraph {
 	return undirGraph
 }
 
+func (m IncidenceMatrix) String() string {
+	edges := m.getSortedSliceEdges()
+	var strBuilder strings.Builder
+	strBuilder.WriteString("   ")
+
+	for _, e := range edges {
+		id := strconv.FormatUint(e.ID, 10)
+		strBuilder.WriteString(id)
+		strBuilder.WriteString(" ")
+	}
+	strBuilder.WriteString("\n")
+
+	nodes := make([]model.Node, 0)
+	for _, e := range edges {
+		nodesToIdx := m[e]
+		for node := range nodesToIdx {
+			nodes = append(nodes, node)
+		}
+		sort.Slice(nodes, func(i, j int) bool {
+			return nodes[i].ID < nodes[j].ID
+		})
+		break
+	}
+	for _, n := range nodes {
+		strBuilder.WriteString(strconv.FormatUint(n.ID, 10))
+		strBuilder.WriteString(": ")
+		for _, e := range edges {
+			strBuilder.WriteString(strconv.FormatUint(uint64(m[e][n]), 10))
+			strBuilder.WriteString(" ")
+		}
+		strBuilder.WriteString("\n")
+	}
+
+	return strBuilder.String()
+}
+
 func (m AdjacencyMatrix) String() string {
 	var strBuilder strings.Builder
-	nodes := m.getSortedSlice()
+	nodes := m.getSortedSliceNodes()
 	strBuilder.WriteString("   ")
 
 	for _, n := range nodes {
@@ -483,7 +519,7 @@ func graphToNodes(graph model.Graph) map[uint64]model.Node {
 	return nodes
 }
 
-func (m AdjacencyMatrix) getSortedSlice() []model.Node {
+func (m AdjacencyMatrix) getSortedSliceNodes() []model.Node {
 	nodes := make([]model.Node, 0, len(m))
 	for k := range m {
 		nodes = append(nodes, k)
@@ -494,4 +530,17 @@ func (m AdjacencyMatrix) getSortedSlice() []model.Node {
 	})
 
 	return nodes
+}
+
+func (m IncidenceMatrix) getSortedSliceEdges() []model.Edge {
+	edges := make([]model.Edge, 0, len(m))
+	for k := range m {
+		edges = append(edges, k)
+	}
+
+	sort.Slice(edges, func(i, j int) bool {
+		return edges[i].ID < edges[j].ID
+	})
+
+	return edges
 }

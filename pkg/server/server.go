@@ -11,7 +11,6 @@ import (
 
 	"github.com/illfate2/graph-api/pkg/model"
 	"github.com/illfate2/graph-api/pkg/service"
-	"github.com/illfate2/graph-api/pkg/service/graph"
 )
 
 type Server struct {
@@ -150,9 +149,9 @@ func (s *Server) IncidenceMatrix(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 	resp := struct {
-		Matrix graph.IncidenceMatrix `json:"matrix"`
+		Matrix string `json:"matrix"`
 	}{
-		Matrix: m,
+		Matrix: m.String(),
 	}
 	_ = json.NewEncoder(w).Encode(resp)
 }
