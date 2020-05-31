@@ -1,6 +1,7 @@
 package graph
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -1989,6 +1990,47 @@ func TestGraph_IsTree(t *testing.T) {
 								ID: 1,
 							},
 							To: model.Node{
+								ID: 2,
+							},
+						},
+						{
+							From: model.Node{
+								ID: 2,
+							},
+							To: model.Node{
+								ID: 3,
+							},
+						},
+						{
+							From: model.Node{
+								ID: 3,
+							},
+							To: model.Node{
+								ID: 4,
+							},
+						},
+						{
+							From: model.Node{
+								ID: 4,
+							},
+							To: model.Node{
+								ID: 1,
+							},
+						},
+					},
+				},
+			},
+			want: false,
+		},
+		{
+			args: args{
+				graph: model.Graph{
+					Edges: []model.Edge{
+						{
+							From: model.Node{
+								ID: 1,
+							},
+							To: model.Node{
 								ID: 0,
 							},
 						},
@@ -2026,6 +2068,57 @@ func TestGraph_IsTree(t *testing.T) {
 			g := Graph{}
 			got := g.IsTree(tt.args.graph)
 			assert.Equal(t, got, tt.want)
+		})
+	}
+}
+
+func TestIncidenceMatrix_String(t *testing.T) {
+	tests := []struct {
+		name string
+		m    IncidenceMatrix
+		want string
+	}{
+		{
+			m: map[model.Edge]map[model.Node]int{
+				model.Edge{
+					ID: 12,
+				}: {
+					model.Node{
+						ID: 1,
+					}: 1,
+					model.Node{
+						ID: 2,
+					}: 1,
+					model.Node{
+						ID: 3,
+					}: 0,
+					model.Node{
+						ID: 4,
+					}: 0,
+				},
+				model.Edge{
+					ID: 23,
+				}: {
+					model.Node{
+						ID: 0,
+					}: 1,
+					model.Node{
+						ID: 2,
+					}: 1,
+					model.Node{
+						ID: 3,
+					}: 1,
+					model.Node{
+						ID: 4,
+					}: 0,
+				},
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := tt.m.String()
+			fmt.Print(got)
 		})
 	}
 }
