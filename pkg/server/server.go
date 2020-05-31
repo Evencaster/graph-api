@@ -2,6 +2,7 @@ package server
 
 import (
 	"encoding/json"
+	"log"
 	"net/http"
 	"strconv"
 	"strings"
@@ -24,7 +25,10 @@ func New(service service.Service) *Server {
 		service: service,
 		Handler: r,
 	}
+
+	r.Methods(http.MethodOptions).HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {})
 	r.Use(CORS)
+
 	r.HandleFunc("/api/v1/graph", s.CreateGraph).Methods(http.MethodPost)
 	r.HandleFunc("/api/v1/graph/{id:[1-9]+[0-9]*}", s.Graph).Methods(http.MethodGet)
 	r.HandleFunc("/api/v1/graph/{id:[1-9]+[0-9]*}", s.UpdateGraph).Methods(http.MethodPut)
@@ -56,11 +60,13 @@ func (s *Server) CreateGraph(w http.ResponseWriter, req *http.Request) {
 	err := json.NewDecoder(req.Body).Decode(&g)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
+		log.Print("Error when decoding JSON: ", err)
 		return
 	}
 	id, err := s.service.CreateGraph(g)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
+		log.Print("Error when creating graph: ", err)
 		return
 	}
 	resp := struct {
