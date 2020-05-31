@@ -15,13 +15,12 @@ var ErrNotFound = errors.New("not found")
 type DB struct {
 	data sync.Map
 	mx   sync.Mutex
-	uuid uuid.UUID
+	//uuid uuid.UUID
 }
 
 func New() *DB {
 	return &DB{
 		data: sync.Map{},
-		uuid: uuid.New(),
 		mx:   sync.Mutex{},
 	}
 }
@@ -36,7 +35,7 @@ type Repository interface {
 
 func (d *DB) CreateGraph(graph model.Graph) (uint64, error) {
 	d.mx.Lock()
-	id := uint64(d.uuid.ID())
+	id := uint64(uuid.New().ID())
 	d.mx.Unlock()
 	graph.ID = id
 	d.data.Store(id, graph)
