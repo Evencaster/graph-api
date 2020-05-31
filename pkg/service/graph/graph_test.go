@@ -2122,3 +2122,147 @@ func TestIncidenceMatrix_String(t *testing.T) {
 		})
 	}
 }
+
+func TestGraph_AllPaths(t *testing.T) {
+	type args struct {
+		graph    model.Graph
+		fromNode uint64
+		toNode   uint64
+	}
+	tests := []struct {
+		name string
+		args args
+		want [][]model.Node
+	}{
+		{
+			args: args{
+				graph: model.Graph{
+					Edges: []model.Edge{
+						{
+							From: model.Node{
+								ID: 2,
+							},
+							To: model.Node{
+								ID: 1,
+							},
+						},
+						{
+							From: model.Node{
+								ID: 0,
+							},
+							To: model.Node{
+								ID: 1,
+							},
+						},
+						{
+							From: model.Node{
+								ID: 1,
+							},
+							To: model.Node{
+								ID: 3,
+							},
+						},
+						{
+							From: model.Node{
+								ID: 0,
+							},
+							To: model.Node{
+								ID: 3,
+							},
+						},
+						{
+							From: model.Node{
+								ID: 0,
+							},
+							To: model.Node{
+								ID: 2,
+							},
+						},
+						{
+							From: model.Node{
+								ID: 2,
+							},
+							To: model.Node{
+								ID: 0,
+							},
+						},
+					},
+					Nodes: []model.Node{
+						{
+							ID: 0,
+						},
+						{
+							ID: 1,
+						},
+						{
+							ID: 2,
+						},
+						{
+							ID: 3,
+						},
+					},
+				},
+				fromNode: 2,
+				toNode:   3,
+			},
+			want: [][]model.Node{
+				{
+					{
+						ID: 2,
+					},
+					{
+						ID: 0,
+					},
+					{
+						ID: 1,
+					},
+					{
+						ID: 3,
+					},
+				},
+				{
+					{
+						ID: 2,
+					},
+					{
+						ID: 0,
+					},
+					{
+						ID: 3,
+					},
+				},
+				{
+					{
+						ID: 2,
+					},
+					{
+						ID: 1,
+					},
+					{
+						ID: 0,
+					},
+					{
+						ID: 3,
+					},
+				},
+				{
+					{
+						ID: 2,
+					},
+					{
+						ID: 1,
+					},
+					{
+						ID: 3,
+					},
+				},
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			g := Graph{}
+			g.AllPaths(tt.args.graph, tt.args.fromNode, tt.args.toNode)
+		})
+	}
+}
