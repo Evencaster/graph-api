@@ -11,6 +11,7 @@ type Service interface {
 	IncidenceMatrix(id uint64) (graph.IncidenceMatrix, error)
 	AdjacencyMatrix(id uint64) (graph.AdjacencyMatrix, error)
 	PlanarCheck(id uint64) (bool, error)
+	PlanarReduction(id uint64) (model.Graph, error)
 	FindDiameter(id uint64) (uint64, error)
 	FindRadius(id uint64) (uint64, error)
 	FindCenter(id uint64) ([]model.Node, error)
@@ -40,6 +41,14 @@ func (g *Graph) PlanarCheck(id uint64) (bool, error) {
 		return false, err
 	}
 	return g.graph.PlanarCheck(foundGraph), nil
+}
+
+func (g *Graph) PlanarReduction(id uint64) (model.Graph, error) {
+	foundGraph, err := g.Graph(id)
+	if err != nil {
+		return model.Graph{}, err
+	}
+	return g.graph.PlanarReduction(foundGraph), nil
 }
 
 func (g *Graph) IsTree(id uint64) bool {

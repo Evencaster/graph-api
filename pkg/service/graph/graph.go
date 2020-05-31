@@ -20,6 +20,7 @@ type (
 type Methods interface {
 	IncidenceMatrix(graph model.Graph) IncidenceMatrix
 	PlanarCheck(graph model.Graph) bool
+	PlanarReduction(graph model.Graph) model.Graph
 	findEccentricity(graph model.Graph, node model.Node, nodes map[model.Node]struct{}) uint64
 	FindDiameter(graph model.Graph) uint64
 	FindRadius(graph model.Graph) uint64
@@ -41,6 +42,18 @@ func (g Graph) PlanarCheck(graph model.Graph) bool {
 		return true
 	}
 	return false
+}
+
+func (g Graph) PlanarReduction(graph model.Graph) model.Graph {
+	planarGraph := graph
+	if len(graph.Edges) <= (3*len(setNodes(graph)) - 6) {
+		return planarGraph
+	}
+	edgesDeleteAmount := len(graph.Edges) - (3*len(setNodes(graph)) - 6)
+
+	planarGraph.Edges = graph.Edges[:len(graph.Edges)-edgesDeleteAmount]
+
+	return planarGraph
 }
 
 func (g Graph) IncidenceMatrix(graph model.Graph) IncidenceMatrix {
@@ -335,23 +348,92 @@ func (g Graph) hamiltonianPath(
 }
 
 func (g Graph) Cartesian(firstGraph, secondGraph model.Graph) model.Graph {
-	firstGraphNodes := setNodes(firstGraph)
-	secondGraphNodes := setNodes(secondGraph)
+	firstGraphNodes := firstGraph.Nodes
+	secondGraphNodes := secondGraph.Nodes
 
 	var cartesian model.Graph
+	var id uint64
 
-	for _, edge := range firstGraph.Edges {
-		cartesian.Edges = append(cartesian.Edges, edge)
-	}
+	for i, firstGraphNode := range firstGraphNodes {
+		for j, secondGraphNode := range secondGraphNodes {
+			fromNode := model.Node{ID: id}
+			id++
 
-	for _, edge := range secondGraph.Edges {
-		cartesian.Edges = append(cartesian.Edges, edge)
-	}
+			for _, edge := range firstGraph.Edges {
+				if edge.From == firstGraphNode {
+					toNode := edge.To
+					var m uint64
+					for k, node := range firstGraph.Nodes {
+						if node == toNode {
+							m = uint64(k)
+							break
+						}
+					}
+					toNodeID := uint64(len(secondGraphNodes))*m + uint64(j)
+					if fromNode.ID > toNodeID {
+						continue
+					}
+					ToNode := model.Node{ID: toNodeID}
+					edge := model.Edge{From: fromNode, To: ToNode}
+					cartesian.Edges = append(cartesian.Edges, edge)
+				}
 
-	for firstGraphNode := range firstGraphNodes {
-		for secondGraphNode := range secondGraphNodes {
-			edge := model.Edge{From: firstGraphNode, To: secondGraphNode}
-			cartesian.Edges = append(cartesian.Edges, edge)
+				if edge.To == firstGraphNode {
+					toNode := edge.From
+					var m uint64
+					for k, node := range firstGraph.Nodes {
+						if node == toNode {
+							m = uint64(k)
+							break
+						}
+					}
+					toNodeID := uint64(len(secondGraphNodes))*m + uint64(j)
+					if fromNode.ID > toNodeID {
+						continue
+					}
+					ToNode := model.Node{ID: toNodeID}
+					edge := model.Edge{From: fromNode, To: ToNode}
+					cartesian.Edges = append(cartesian.Edges, edge)
+				}
+			}
+
+			for _, edge := range secondGraph.Edges {
+				if edge.From == secondGraphNode {
+					toNode := edge.To
+					var m uint64
+					for k, node := range secondGraph.Nodes {
+						if node == toNode {
+							m = uint64(k)
+							break
+						}
+					}
+					toNodeID := uint64(len(secondGraphNodes))*uint64(i) + m
+					if fromNode.ID > toNodeID {
+						continue
+					}
+					ToNode := model.Node{ID: toNodeID}
+					edge := model.Edge{From: fromNode, To: ToNode}
+					cartesian.Edges = append(cartesian.Edges, edge)
+				}
+
+				if edge.To == secondGraphNode {
+					toNode := edge.From
+					var m uint64
+					for k, node := range secondGraph.Nodes {
+						if node == toNode {
+							m = uint64(k)
+							break
+						}
+					}
+					toNodeID := uint64(len(secondGraphNodes))*uint64(i) + m
+					if fromNode.ID > toNodeID {
+						continue
+					}
+					ToNode := model.Node{ID: toNodeID}
+					edge := model.Edge{From: fromNode, To: ToNode}
+					cartesian.Edges = append(cartesian.Edges, edge)
+				}
+			}
 		}
 	}
 	return cartesian
