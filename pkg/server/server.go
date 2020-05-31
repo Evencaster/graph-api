@@ -404,7 +404,7 @@ func getPathArgs(req *http.Request) (pathArgs, error) {
 	if err != nil {
 		return pathArgs{}, err
 	}
-	startedNode, err := getSpecificID(req, "startedNode")
+	startedNode, err := getSpecificID(req, "startNode")
 	if err != nil {
 		return pathArgs{}, err
 	}
