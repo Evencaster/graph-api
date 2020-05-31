@@ -54,6 +54,7 @@ func New(service service.Service) *Server {
 		Queries("startNode", "{startNode}").Methods(http.MethodGet)
 
 	r.HandleFunc("/api/v1/graph/{id:[1-9]+[0-9]*}/planarCheck", s.PlanarCheck).Methods(http.MethodGet)
+	r.HandleFunc("/api/v1/graph/{id:[1-9]+[0-9]*}/planarReduction", s.PlanarReduction).Methods(http.MethodGet)
 	r.HandleFunc("/api/v1/graph/{id:[1-9]+[0-9]*}/isTree", s.IsTree).Methods(http.MethodGet)
 	r.HandleFunc("/api/v1/graph/list", s.GraphList).Methods(http.MethodGet)
 	return &s
@@ -288,6 +289,25 @@ func (s *Server) PlanarCheck(w http.ResponseWriter, req *http.Request) {
 		IsPlanar bool `json:"isPlanar"`
 	}{
 		IsPlanar: res,
+	}
+	_ = json.NewEncoder(w).Encode(resp)
+}
+
+func (s *Server) PlanarReduction(w http.ResponseWriter, req *http.Request) {
+	id, err := getID(req)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+	res, err := s.service.PlanarReduction(id)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	resp := struct {
+		PlanarGraph model.Graph `json:"isPlanar"`
+	}{
+		PlanarGraph: res,
 	}
 	_ = json.NewEncoder(w).Encode(resp)
 }
