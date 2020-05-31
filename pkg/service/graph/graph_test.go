@@ -1489,147 +1489,144 @@ func TestGraph_HamiltonianPath(t *testing.T) {
 	}
 }
 
-//func TestGraph_Cartesian(t *testing.T) {
-//	type args struct {
-//		firstGraph    model.Graph
-//		secondGraph   model.Graph
-//	}
-//	tests := []struct {
-//		name string
-//		args args
-//		want model.Graph
-//	}{
-//		{
-//			args: args{
-//				firstGraph: model.Graph{
-//					Edges: []model.Edge{
-//						{
-//							From: model.Node{
-//								ID: 2,
-//							},
-//							To: model.Node{
-//								ID:    1,
-//								Name:  "First",
-//								Color: "BLue",
-//							},
-//						},
-//						{
-//							From: model.Node{
-//								ID: 3,
-//							},
-//							To: model.Node{
-//								ID: 2,
-//							},
-//						},
-//					},
-//				},
-//				secondGraph: model.Graph{
-//					Edges: []model.Edge{
-//						{
-//							From: model.Node{
-//								ID: 4,
-//							},
-//							To: model.Node{
-//								ID:    5,
-//							},
-//						},
-//					},
-//				},
-//			},
-//			want: model.Graph{
-//				Edges: []model.Edge{
-//					{
-//						From: model.Node{
-//							ID: 2,
-//						},
-//						To: model.Node{
-//							ID: 1,
-//							Name:  "First",
-//							Color: "BLue",
-//						},
-//					},
-//					{
-//						From: model.Node{
-//							ID: 3,
-//						},
-//						To: model.Node{
-//							ID: 2,
-//						},
-//					},
-//					{
-//						From: model.Node{
-//							ID: 4,
-//						},
-//						To: model.Node{
-//							ID: 5,
-//						},
-//					},
-//					{
-//						From: model.Node{
-//							ID: 1,
-//							Name:  "First",
-//							Color: "BLue",
-//						},
-//						To: model.Node{
-//							ID: 4,
-//						},
-//					},
-//					{
-//						From: model.Node{
-//							ID: 1,
-//							Name:  "First",
-//							Color: "BLue",
-//						},
-//						To: model.Node{
-//							ID: 5,
-//						},
-//					},
-//					{
-//						From: model.Node{
-//							ID: 2,
-//						},
-//						To: model.Node{
-//							ID: 4,
-//						},
-//					},
-//					{
-//						From: model.Node{
-//							ID: 2,
-//						},
-//						To: model.Node{
-//							ID: 5,
-//						},
-//					},
-//					{
-//						From: model.Node{
-//							ID: 3,
-//						},
-//						To: model.Node{
-//							ID: 4,
-//						},
-//					},
-//					{
-//						From: model.Node{
-//							ID: 2,
-//						},
-//						To: model.Node{
-//							ID: 5,
-//						},
-//					},
-//				},
-//
-//			},
-//		},
-//
-//	}
-//	for _, tt := range tests {
-//		t.Run(tt.name, func(t *testing.T) {
-//			g := Graph{}
-//			got := g.Cartesian(tt.args.firstGraph, tt.args.secondGraph)
-//			assert.Equal(t, tt.want, got)
-//		})
-//	}
-//}
+func TestGraph_Cartesian(t *testing.T) {
+	type args struct {
+		firstGraph  model.Graph
+		secondGraph model.Graph
+	}
+	tests := []struct {
+		name string
+		args args
+		want model.Graph
+	}{
+		{
+			args: args{
+				firstGraph: model.Graph{
+					Nodes: []model.Node{
+						{
+							ID:    1,
+							Name:  "First",
+							Color: "BLue",
+						},
+						{
+							ID: 2,
+						},
+						{
+							ID: 3,
+						},
+					},
+					Edges: []model.Edge{
+						{
+							From: model.Node{
+								ID: 2,
+							},
+							To: model.Node{
+								ID:    1,
+								Name:  "First",
+								Color: "BLue",
+							},
+						},
+						{
+							From: model.Node{
+								ID: 3,
+							},
+							To: model.Node{
+								ID: 2,
+							},
+						},
+					},
+				},
+				secondGraph: model.Graph{
+					Edges: []model.Edge{
+						{
+							From: model.Node{
+								ID: 4,
+							},
+							To: model.Node{
+								ID: 5,
+							},
+						},
+					},
+					Nodes: []model.Node{
+						{
+							ID: 4,
+						},
+						{
+							ID: 5,
+						},
+					},
+				},
+			},
+			want: model.Graph{
+				Edges: []model.Edge{
+					{
+						From: model.Node{
+							ID: 0,
+						},
+						To: model.Node{
+							ID: 2,
+						},
+					},
+					{
+						From: model.Node{
+							ID: 0,
+						},
+						To: model.Node{
+							ID: 1,
+						},
+					},
+					{
+						From: model.Node{
+							ID: 1,
+						},
+						To: model.Node{
+							ID: 3,
+						},
+					},
+					{
+						From: model.Node{
+							ID: 2,
+						},
+						To: model.Node{
+							ID: 4,
+						},
+					},
+					{
+						From: model.Node{
+							ID: 2,
+						},
+						To: model.Node{
+							ID: 3,
+						},
+					},
+					{
+						From: model.Node{
+							ID: 3,
+						},
+						To: model.Node{
+							ID: 5,
+						},
+					},
+					{
+						From: model.Node{
+							ID: 4,
+						},
+						To: model.Node{
+							ID: 5,
+						},
+					},
+				},
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			g := Graph{}
+			got := g.Cartesian(tt.args.firstGraph, tt.args.secondGraph)
+			assert.Equal(t, tt.want, got)
+		})
+	}
+}
 
 func TestGraph_PlanarReduction(t *testing.T) {
 	type args struct {
