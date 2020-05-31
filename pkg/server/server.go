@@ -5,6 +5,7 @@ import (
 	"log"
 	"net/http"
 	"strconv"
+	"strings"
 
 	"github.com/gorilla/mux"
 
@@ -37,6 +38,8 @@ func New(service service.Service) *Server {
 	r.HandleFunc("/api/v1/graph/{id:[1-9]+[0-9]*}/diameter", s.FindDiameter).Methods(http.MethodGet)
 	r.HandleFunc("/api/v1/graph/{id:[1-9]+[0-9]*}/radius", s.FindRadius).Methods(http.MethodGet)
 	r.HandleFunc("/api/v1/graph/{id:[1-9]+[0-9]*}/center", s.FindCenter).Methods(http.MethodGet)
+	r.HandleFunc("/api/v1/graph/{ids:[1-9]+[0-9]*[,][1-9]+[0-9]*}/cartesian", s.Cartesian).Methods(http.MethodGet)
+
 	r.HandleFunc("/api/v1/graph/{id:[1-9]+[0-9]*}/shortestPath", s.ShortestPath).
 		Queries("fromNode", "{fromNode}", "toNode", "{toNode}").Methods(http.MethodGet)
 
@@ -208,6 +211,25 @@ func (s *Server) FindDiameter(w http.ResponseWriter, req *http.Request) {
 	_ = json.NewEncoder(w).Encode(resp)
 }
 
+func (s *Server) Cartesian(w http.ResponseWriter, req *http.Request) {
+	firstID, secondID, err := getIDs(req)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+	c, err := s.service.Cartesian(firstID, secondID)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	resp := struct {
+		Cartesian model.Graph `json:"cartesian"`
+	}{
+		Cartesian: c,
+	}
+	_ = json.NewEncoder(w).Encode(resp)
+}
+
 func (s *Server) FindCenter(w http.ResponseWriter, req *http.Request) {
 	id, err := getID(req)
 	if err != nil {
@@ -315,6 +337,17 @@ func (s *Server) AllShortestPaths(w http.ResponseWriter, req *http.Request) {
 
 func getID(req *http.Request) (uint64, error) {
 	return getSpecificID(req, "id")
+}
+
+func getIDs(req *http.Request) (first, second uint64, err error) {
+	vars := mux.Vars(req)
+	ids := strings.Split(vars["ids"], ",")
+	first, err = strconv.ParseUint(ids[0], 10, 64)
+	if err != nil {
+		return
+	}
+	second, err = strconv.ParseUint(ids[1], 10, 64)
+	return
 }
 
 type shortestPathArgs struct {
