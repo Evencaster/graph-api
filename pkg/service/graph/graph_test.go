@@ -1630,3 +1630,110 @@ func TestGraph_HamiltonianPath(t *testing.T) {
 //		})
 //	}
 //}
+
+func TestGraph_IsTree(t *testing.T) {
+	type args struct {
+		graph model.Graph
+	}
+	tests := []struct {
+		name string
+		args args
+		want bool
+	}{
+		{
+			args: args{
+				graph: model.Graph{
+					Edges: []model.Edge{
+						{
+							From: model.Node{
+								ID: 1,
+							},
+							To: model.Node{
+								ID: 2,
+							},
+						},
+						{
+							From: model.Node{
+								ID: 1,
+							},
+							To: model.Node{
+								ID: 0,
+							},
+						},
+						{
+							From: model.Node{
+								ID: 2,
+							},
+							To: model.Node{
+								ID: 0,
+							},
+						},
+						{
+							From: model.Node{
+								ID: 0,
+							},
+							To: model.Node{
+								ID: 3,
+							},
+						},						{
+							From: model.Node{
+								ID: 3,
+							},
+							To: model.Node{
+								ID: 4,
+							},
+						},
+					},
+				},
+			},
+			want: false,
+		},
+		{
+			args: args{
+				graph: model.Graph{
+					Edges: []model.Edge{
+						{
+							From: model.Node{
+								ID: 1,
+							},
+							To: model.Node{
+								ID: 0,
+							},
+						},
+						{
+							From: model.Node{
+								ID: 2,
+							},
+							To: model.Node{
+								ID: 0,
+							},
+						},
+						{
+							From: model.Node{
+								ID: 0,
+							},
+							To: model.Node{
+								ID: 3,
+							},
+						},						{
+							From: model.Node{
+								ID: 3,
+							},
+							To: model.Node{
+								ID: 4,
+							},
+						},
+					},
+				},
+			},
+			want: true,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			g := Graph{}
+			got := g.IsTree(tt.args.graph)
+			assert.Equal(t, got, tt.want)
+		})
+	}
+}

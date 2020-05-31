@@ -19,6 +19,7 @@ type Service interface {
 	HamiltonianPath(graphID, startedNode uint64) ([]model.Node, error)
 	EulerianCycle(graphID, startedNode uint64) ([]model.Node, error)
 	Cartesian(firstGraphID, secondGraphID uint64) (model.Graph, error)
+	IsTree(graphID uint64) bool
 }
 
 type Graph struct {
@@ -39,6 +40,14 @@ func (g *Graph) PlanarCheck(id uint64) (bool, error) {
 		return false, err
 	}
 	return g.graph.PlanarCheck(foundGraph), nil
+}
+
+func (g *Graph) IsTree(id uint64) bool {
+	foundGraph, err := g.Graph(id)
+	if err != nil {
+		return false
+	}
+	return g.graph.IsTree(foundGraph)
 }
 
 func (g *Graph) Cartesian(firstGraphID, secondGraphID uint64) (model.Graph, error) {
