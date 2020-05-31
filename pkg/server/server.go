@@ -45,6 +45,9 @@ func New(service service.Service) *Server {
 	r.HandleFunc("/api/v1/graph/{id:[1-9]+[0-9]*}/allShortestPath", s.AllShortestPaths).
 		Queries("fromNode", "{fromNode}", "toNode", "{toNode}").Methods(http.MethodGet)
 
+	r.HandleFunc("/api/v1/graph/{id:[1-9]+[0-9]*}/allPath", s.AllPaths).
+		Queries("fromNode", "{fromNode}", "toNode", "{toNode}").Methods(http.MethodGet)
+
 	r.HandleFunc("/api/v1/graph/{id:[1-9]+[0-9]*}/hamiltonianPath", s.HamiltonianPath).
 		Queries("startNode", "{startNode}").Methods(http.MethodGet)
 	r.HandleFunc("/api/v1/graph/{id:[1-9]+[0-9]*}/eulerianCycle", s.EulerianCycle).
@@ -340,6 +343,25 @@ func (s *Server) AllShortestPaths(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 	path, err := s.service.AllShortestPaths(args.graphID, args.fromNode, args.toNode)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	resp := struct {
+		Path [][]model.Node `json:"paths"`
+	}{
+		Path: path,
+	}
+	_ = json.NewEncoder(w).Encode(resp)
+}
+
+func (s *Server) AllPaths(w http.ResponseWriter, req *http.Request) {
+	args, err := getShortestPathArgs(req)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+	path, err := s.service.AllPaths(args.graphID, args.fromNode, args.toNode)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		return

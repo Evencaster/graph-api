@@ -27,6 +27,7 @@ type Methods interface {
 	AdjacencyMatrix(graph model.Graph) AdjacencyMatrix
 	ShortestPath(graph model.Graph, fromNode, toNode uint64) []model.Node
 	AllShortestPaths(graph model.Graph, fromNode, toNode uint64) [][]model.Node
+	AllPaths(graph model.Graph, fromNode, toNode uint64) [][]model.Node
 	HamiltonianPath(graph model.Graph, orig uint64) ([]model.Node, bool)
 	EulerianCycle(graph model.Graph, orig uint64) ([]model.Node, bool)
 	Cartesian(first, second model.Graph) model.Graph
@@ -222,6 +223,55 @@ func (g Graph) AllShortestPaths(graph model.Graph, fromNode, toNode uint64) [][]
 	return paths.AllShortestPathsFind(nodes, matrix, currentNode, toNode)
 }
 
+func (g Graph) AllPaths(graph model.Graph, fromNode, toNode uint64) [][]model.Node {
+	visited := make(map[model.Node]bool)
+	result := make([][]model.Node, 0)
+	paths := make([]model.Node, len(graph.Nodes))
+	var pathIdx int
+	var (
+		from model.Node
+		to   model.Node
+	)
+	for _, n := range graph.Nodes {
+		if n.ID == toNode {
+			to = n
+		} else if n.ID == fromNode {
+			from = n
+		}
+	}
+	g.allPaths(from, to, visited, paths, &pathIdx, nodeToAllNodesAsNode(graph), result)
+	return nil
+}
+
+func (g Graph) allPaths(
+	fromNode, toNode model.Node,
+	visited map[model.Node]bool,
+	path []model.Node,
+	pathIdx *int,
+	adj map[model.Node][]model.Node,
+	result [][]model.Node,
+) {
+	visited[fromNode] = true
+	path[*pathIdx] = fromNode
+	*pathIdx++
+	if fromNode == toNode {
+		resPath := make([]model.Node, 0, *pathIdx)
+		for i := 0; i < *pathIdx; i++ {
+			resPath = append(resPath, path[i])
+		}
+		result = append(result, resPath)
+	} else {
+		for _, n := range adj[fromNode] {
+			if !visited[n] {
+				g.allPaths(n, toNode, visited, path, pathIdx, adj, result)
+			}
+		}
+	}
+	*pathIdx--
+	visited[fromNode] = false
+
+}
+
 func (g Graph) HamiltonianPath(graph model.Graph, orig uint64) ([]model.Node, bool) {
 	visited := make(map[uint64]bool)
 	path := []uint64{orig}
@@ -405,6 +455,31 @@ func nodeToAllNodes(graph model.Graph) map[uint64][]uint64 {
 		}
 		sort.Slice(nodes, func(i, j int) bool {
 			return nodes[i] < nodes[j]
+		})
+		nodeToSorted[k] = nodes
+	}
+	return nodeToSorted
+}
+
+func nodeToAllNodesAsNode(graph model.Graph) map[model.Node][]model.Node {
+	nodeToEdges := make(map[model.Node]map[model.Node]struct{})
+	for _, e := range graph.Edges {
+		nodeToEdges[e.From] = make(map[model.Node]struct{})
+		nodeToEdges[e.To] = make(map[model.Node]struct{})
+	}
+	for _, e := range graph.Edges {
+		nodeToEdges[e.From][e.To] = struct{}{}
+		nodeToEdges[e.To][e.From] = struct{}{}
+	}
+
+	nodeToSorted := make(map[model.Node][]model.Node)
+	for k := range nodeToEdges {
+		nodes := make([]model.Node, 0, len(nodeToEdges[k]))
+		for k := range nodeToEdges[k] {
+			nodes = append(nodes, k)
+		}
+		sort.Slice(nodes, func(i, j int) bool {
+			return nodes[i].ID < nodes[j].ID
 		})
 		nodeToSorted[k] = nodes
 	}

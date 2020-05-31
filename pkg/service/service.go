@@ -16,6 +16,7 @@ type Service interface {
 	FindCenter(id uint64) ([]model.Node, error)
 	ShortestPath(graphID, fromNode, toNode uint64) ([]model.Node, error)
 	AllShortestPaths(graphID, fromNode, toNode uint64) ([][]model.Node, error)
+	AllPaths(graphID, fromNode, toNode uint64) ([][]model.Node, error)
 	HamiltonianPath(graphID, startedNode uint64) ([]model.Node, error)
 	EulerianCycle(graphID, startedNode uint64) ([]model.Node, error)
 	Cartesian(firstGraphID, secondGraphID uint64) (model.Graph, error)
@@ -116,6 +117,14 @@ func (g *Graph) AllShortestPaths(graphID, fromNode, toNode uint64) ([][]model.No
 		return nil, err
 	}
 	return g.graph.AllShortestPaths(foundGraph, fromNode, toNode), nil
+}
+
+func (g *Graph) AllPaths(graphID, fromNode, toNode uint64) ([][]model.Node, error) {
+	foundGraph, err := g.Graph(graphID)
+	if err != nil {
+		return nil, err
+	}
+	return g.graph.AllPaths(foundGraph, fromNode, toNode), nil
 }
 
 func (g *Graph) HamiltonianPath(graphID, startedNode uint64) ([]model.Node, error) {
