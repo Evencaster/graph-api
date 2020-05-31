@@ -1698,6 +1698,47 @@ func TestGraph_IsTree(t *testing.T) {
 								ID: 1,
 							},
 							To: model.Node{
+								ID: 2,
+							},
+						},
+						{
+							From: model.Node{
+								ID: 2,
+							},
+							To: model.Node{
+								ID: 3,
+							},
+						},
+						{
+							From: model.Node{
+								ID: 3,
+							},
+							To: model.Node{
+								ID: 4,
+							},
+						},
+						{
+							From: model.Node{
+								ID: 4,
+							},
+							To: model.Node{
+								ID: 1,
+							},
+						},
+					},
+				},
+			},
+			want: false,
+		},
+		{
+			args: args{
+				graph: model.Graph{
+					Edges: []model.Edge{
+						{
+							From: model.Node{
+								ID: 1,
+							},
+							To: model.Node{
 								ID: 0,
 							},
 						},
@@ -1762,7 +1803,6 @@ func TestIncidenceMatrix_String(t *testing.T) {
 					model.Node{
 						ID: 4,
 					}: 0,
-
 				},
 				model.Edge{
 					ID: 23,
@@ -1779,7 +1819,6 @@ func TestIncidenceMatrix_String(t *testing.T) {
 					model.Node{
 						ID: 4,
 					}: 0,
-
 				},
 			},
 		},
