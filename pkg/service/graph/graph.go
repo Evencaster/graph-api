@@ -1,6 +1,7 @@
 package graph
 
 import (
+	"github.com/google/uuid"
 	"sort"
 	"strconv"
 	"strings"
@@ -440,7 +441,7 @@ func (g Graph) Cartesian(firstGraph, secondGraph model.Graph) model.Graph {
 						continue
 					}
 					ToNode := model.Node{ID: toNodeID, X: toNode.X, Y: secondGraphNode.Y}
-					edge := model.Edge{From: fromNode, To: ToNode}
+					edge := model.Edge{From: fromNode, To: ToNode, ID: uint64(uuid.New().ID()) & 0x000000ffff}
 					cartesian.Edges = append(cartesian.Edges, edge)
 				}
 
@@ -458,7 +459,7 @@ func (g Graph) Cartesian(firstGraph, secondGraph model.Graph) model.Graph {
 						continue
 					}
 					ToNode := model.Node{ID: toNodeID, X: toNode.X, Y: secondGraphNode.Y}
-					edge := model.Edge{From: fromNode, To: ToNode}
+					edge := model.Edge{From: fromNode, To: ToNode, ID: uint64(uuid.New().ID()) & 0x000000ffff}
 					cartesian.Edges = append(cartesian.Edges, edge)
 				}
 			}
@@ -478,7 +479,7 @@ func (g Graph) Cartesian(firstGraph, secondGraph model.Graph) model.Graph {
 						continue
 					}
 					ToNode := model.Node{ID: toNodeID, X: firstGraphNode.X, Y: toNode.Y}
-					edge := model.Edge{From: fromNode, To: ToNode}
+					edge := model.Edge{From: fromNode, To: ToNode, ID: uint64(uuid.New().ID()) & 0x000000ffff}
 					cartesian.Edges = append(cartesian.Edges, edge)
 				}
 
@@ -496,7 +497,7 @@ func (g Graph) Cartesian(firstGraph, secondGraph model.Graph) model.Graph {
 						continue
 					}
 					ToNode := model.Node{ID: toNodeID, X: firstGraphNode.X, Y: toNode.Y}
-					edge := model.Edge{From: fromNode, To: ToNode}
+					edge := model.Edge{From: fromNode, To: ToNode, ID: uint64(uuid.New().ID()) & 0x000000ffff}
 					cartesian.Edges = append(cartesian.Edges, edge)
 				}
 			}
