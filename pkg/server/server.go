@@ -36,6 +36,7 @@ func New(service service.Service) *Server {
 	r.HandleFunc("/api/v1/graph/{id:[1-9]+[0-9]*}/incidenceMatrix", s.IncidenceMatrix).Methods(http.MethodGet)
 	r.HandleFunc("/api/v1/graph/{id:[1-9]+[0-9]*}/diameter", s.FindDiameter).Methods(http.MethodGet)
 	r.HandleFunc("/api/v1/graph/{id:[1-9]+[0-9]*}/radius", s.FindRadius).Methods(http.MethodGet)
+	r.HandleFunc("/api/v1/graph/{id:[1-9]+[0-9]*}/tree", s.Tree).Methods(http.MethodGet)
 	r.HandleFunc("/api/v1/graph/{id:[1-9]+[0-9]*}/center", s.FindCenter).Methods(http.MethodGet)
 	r.HandleFunc("/api/v1/graph/{ids:[1-9]+[0-9]*[,][1-9]+[0-9]*}/cartesian", s.Cartesian).Methods(http.MethodGet)
 
@@ -308,6 +309,25 @@ func (s *Server) PlanarReduction(w http.ResponseWriter, req *http.Request) {
 		PlanarGraph model.Graph `json:"isPlanar"`
 	}{
 		PlanarGraph: res,
+	}
+	_ = json.NewEncoder(w).Encode(resp)
+}
+
+func (s *Server) Tree(w http.ResponseWriter, req *http.Request) {
+	id, err := getID(req)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+	res, err := s.service.Tree(id)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	resp := struct {
+		Tree model.Graph `json:"tree"`
+	}{
+		Tree: res,
 	}
 	_ = json.NewEncoder(w).Encode(resp)
 }

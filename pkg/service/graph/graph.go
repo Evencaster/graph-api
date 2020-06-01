@@ -21,6 +21,7 @@ type Methods interface {
 	IncidenceMatrix(graph model.Graph) IncidenceMatrix
 	PlanarCheck(graph model.Graph) bool
 	PlanarReduction(graph model.Graph) model.Graph
+	Tree(graph model.Graph) model.Graph
 	findEccentricity(graph model.Graph, node model.Node, nodes map[model.Node]struct{}) uint64
 	FindDiameter(graph model.Graph) uint64
 	FindRadius(graph model.Graph) uint64
@@ -55,6 +56,18 @@ func (g Graph) PlanarReduction(graph model.Graph) model.Graph {
 	planarGraph.Edges = graph.Edges[:len(graph.Edges)-edgesDeleteAmount]
 
 	return planarGraph
+}
+
+func (g Graph) Tree(graph model.Graph) model.Graph {
+	nodes := graph.Nodes[:5]
+	edges := make([]model.Edge, 4)
+	for i := 1; i <= len(nodes)-1; i++ {
+		edges[i-1] = graph.Edges[i-1]
+		edges[i-1].From = nodes[i-1]
+		edges[i-1].To = nodes[i]
+	}
+	graph.Edges = edges
+	return graph
 }
 
 func (g Graph) IncidenceMatrix(graph model.Graph) IncidenceMatrix {
@@ -252,8 +265,8 @@ func (g Graph) AllPaths(graph model.Graph, fromNode, toNode uint64) [][]model.No
 			from = n
 		}
 	}
-	g.allPaths(from, to, visited, paths, &pathIdx, nodeToAllNodesAsNode(graph), result)
-	return nil
+	g.allPaths(from, to, visited, paths, &pathIdx, nodeToAllNodesAsNode(graph), &result)
+	return result
 }
 
 func (g Graph) allPaths(
@@ -262,7 +275,7 @@ func (g Graph) allPaths(
 	path []model.Node,
 	pathIdx *int,
 	adj map[model.Node][]model.Node,
-	result [][]model.Node,
+	result *[][]model.Node,
 ) {
 	visited[fromNode] = true
 	path[*pathIdx] = fromNode
@@ -272,7 +285,7 @@ func (g Graph) allPaths(
 		for i := 0; i < *pathIdx; i++ {
 			resPath = append(resPath, path[i])
 		}
-		result = append(result, resPath)
+		*result = append(*result, resPath)
 	} else {
 		for _, n := range adj[fromNode] {
 			if !visited[n] {
