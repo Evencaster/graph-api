@@ -306,7 +306,7 @@ func (s *Server) PlanarReduction(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 	resp := struct {
-		PlanarGraph model.Graph `json:"isPlanar"`
+		PlanarGraph model.Graph `json:"PlanarGraph"`
 	}{
 		PlanarGraph: res,
 	}
