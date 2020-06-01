@@ -1581,6 +1581,38 @@ func TestGraph_Cartesian(t *testing.T) {
 				},
 			},
 			want: model.Graph{
+				Nodes: []model.Node{
+					{
+						ID: 0,
+						X:  1,
+						Y:  4,
+					},
+					{
+						ID: 1,
+						X:  1,
+						Y:  5,
+					},
+					{
+						ID: 2,
+						X:  2,
+						Y:  4,
+					},
+					{
+						ID: 3,
+						X:  2,
+						Y:  5,
+					},
+					{
+						ID: 4,
+						X:  3,
+						Y:  4,
+					},
+					{
+						ID: 5,
+						X:  3,
+						Y:  5,
+					},
+				},
 				Edges: []model.Edge{
 					{
 						From: model.Node{

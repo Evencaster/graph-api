@@ -403,10 +403,13 @@ func (g Graph) Cartesian(firstGraph, secondGraph model.Graph) model.Graph {
 
 	var cartesian model.Graph
 	var id uint64
+	cartesian.ID = firstGraph.ID
+	cartesian.Name = firstGraph.Name
 
 	for i, firstGraphNode := range firstGraphNodes {
 		for j, secondGraphNode := range secondGraphNodes {
 			fromNode := model.Node{ID: id, X: firstGraphNode.X, Y: secondGraphNode.Y}
+			cartesian.Nodes = append(cartesian.Nodes, fromNode)
 			id++
 
 			for _, edge := range firstGraph.Edges {
