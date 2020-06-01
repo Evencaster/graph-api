@@ -252,8 +252,8 @@ func (g Graph) AllPaths(graph model.Graph, fromNode, toNode uint64) [][]model.No
 			from = n
 		}
 	}
-	g.allPaths(from, to, visited, paths, &pathIdx, nodeToAllNodesAsNode(graph), result)
-	return nil
+	g.allPaths(from, to, visited, paths, &pathIdx, nodeToAllNodesAsNode(graph), &result)
+	return result
 }
 
 func (g Graph) allPaths(
@@ -262,7 +262,7 @@ func (g Graph) allPaths(
 	path []model.Node,
 	pathIdx *int,
 	adj map[model.Node][]model.Node,
-	result [][]model.Node,
+	result *[][]model.Node,
 ) {
 	visited[fromNode] = true
 	path[*pathIdx] = fromNode
@@ -272,7 +272,7 @@ func (g Graph) allPaths(
 		for i := 0; i < *pathIdx; i++ {
 			resPath = append(resPath, path[i])
 		}
-		result = append(result, resPath)
+		*result = append(*result, resPath)
 	} else {
 		for _, n := range adj[fromNode] {
 			if !visited[n] {
