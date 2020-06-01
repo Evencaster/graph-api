@@ -21,6 +21,7 @@ type Methods interface {
 	IncidenceMatrix(graph model.Graph) IncidenceMatrix
 	PlanarCheck(graph model.Graph) bool
 	PlanarReduction(graph model.Graph) model.Graph
+	Tree(graph model.Graph) model.Graph
 	findEccentricity(graph model.Graph, node model.Node, nodes map[model.Node]struct{}) uint64
 	FindDiameter(graph model.Graph) uint64
 	FindRadius(graph model.Graph) uint64
@@ -55,6 +56,18 @@ func (g Graph) PlanarReduction(graph model.Graph) model.Graph {
 	planarGraph.Edges = graph.Edges[:len(graph.Edges)-edgesDeleteAmount]
 
 	return planarGraph
+}
+
+func (g Graph) Tree(graph model.Graph) model.Graph {
+	nodes := graph.Nodes[:5]
+	edges := make([]model.Edge, 4)
+	for i := 1; i <= len(nodes)-1; i++ {
+		edges[i-1] = graph.Edges[i-1]
+		edges[i-1].From = nodes[i-1]
+		edges[i-1].To = nodes[i]
+	}
+	graph.Edges = edges
+	return graph
 }
 
 func (g Graph) IncidenceMatrix(graph model.Graph) IncidenceMatrix {
@@ -406,7 +419,7 @@ func (g Graph) Cartesian(firstGraph, secondGraph model.Graph) model.Graph {
 
 	for i, firstGraphNode := range firstGraphNodes {
 		for j, secondGraphNode := range secondGraphNodes {
-			fromNode := model.Node{ID: id}
+			fromNode := model.Node{ID: id, X: firstGraphNode.X, Y: secondGraphNode.Y}
 			id++
 
 			for _, edge := range firstGraph.Edges {
@@ -423,7 +436,7 @@ func (g Graph) Cartesian(firstGraph, secondGraph model.Graph) model.Graph {
 					if fromNode.ID > toNodeID {
 						continue
 					}
-					ToNode := model.Node{ID: toNodeID}
+					ToNode := model.Node{ID: toNodeID, X: toNode.X, Y: secondGraphNode.Y}
 					edge := model.Edge{From: fromNode, To: ToNode}
 					cartesian.Edges = append(cartesian.Edges, edge)
 				}
@@ -441,7 +454,7 @@ func (g Graph) Cartesian(firstGraph, secondGraph model.Graph) model.Graph {
 					if fromNode.ID > toNodeID {
 						continue
 					}
-					ToNode := model.Node{ID: toNodeID}
+					ToNode := model.Node{ID: toNodeID, X: toNode.X, Y: secondGraphNode.Y}
 					edge := model.Edge{From: fromNode, To: ToNode}
 					cartesian.Edges = append(cartesian.Edges, edge)
 				}
@@ -461,7 +474,7 @@ func (g Graph) Cartesian(firstGraph, secondGraph model.Graph) model.Graph {
 					if fromNode.ID > toNodeID {
 						continue
 					}
-					ToNode := model.Node{ID: toNodeID}
+					ToNode := model.Node{ID: toNodeID, X: firstGraphNode.X, Y: toNode.Y}
 					edge := model.Edge{From: fromNode, To: ToNode}
 					cartesian.Edges = append(cartesian.Edges, edge)
 				}
@@ -479,7 +492,7 @@ func (g Graph) Cartesian(firstGraph, secondGraph model.Graph) model.Graph {
 					if fromNode.ID > toNodeID {
 						continue
 					}
-					ToNode := model.Node{ID: toNodeID}
+					ToNode := model.Node{ID: toNodeID, X: firstGraphNode.X, Y: toNode.Y}
 					edge := model.Edge{From: fromNode, To: ToNode}
 					cartesian.Edges = append(cartesian.Edges, edge)
 				}
